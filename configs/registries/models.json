@@ -1,0 +1,41 @@
+[
+  {
+    "schema_version": "mercury.model.profile/v1",
+    "model_id": "sim-text-small-v1",
+    "provider": "simulation",
+    "family": "synthetic-text",
+    "version": "1.0",
+    "capabilities": ["generation", "reasoning"],
+    "supported_precisions": ["fp32", "int8"],
+    "context_window_tokens": 8192,
+    "min_memory_gb": 2.0,
+    "estimated_cost_per_1k_tokens": null,
+    "capability_labels": ["SIMULATED"]
+  },
+  {
+    "schema_version": "mercury.model.profile/v1",
+    "model_id": "sim-embedding-small-v1",
+    "provider": "simulation",
+    "family": "synthetic-embedding",
+    "version": "1.0",
+    "capabilities": ["embedding", "retrieval"],
+    "supported_precisions": ["fp32", "int8"],
+    "context_window_tokens": 4096,
+    "min_memory_gb": 1.0,
+    "estimated_cost_per_1k_tokens": null,
+    "capability_labels": ["SIMULATED"]
+  },
+  {
+    "schema_version": "mercury.model.profile/v1",
+    "model_id": "sim-vision-small-v1",
+    "provider": "simulation",
+    "family": "synthetic-vision-language",
+    "version": "1.0",
+    "capabilities": ["vision", "generation"],
+    "supported_precisions": ["fp16", "int8"],
+    "context_window_tokens": 4096,
+    "min_memory_gb": 4.0,
+    "estimated_cost_per_1k_tokens": null,
+    "capability_labels": ["SIMULATED"]
+  }
+]

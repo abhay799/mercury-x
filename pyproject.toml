@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools==84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mercury-x"
+version = "0.0.0"
+description = "MERCURY X Autonomous Cognitive Compute Fabric pre-development baseline"
+requires-python = ">=3.13,<3.14"
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mercury*"]

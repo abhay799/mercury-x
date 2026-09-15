@@ -1,0 +1,111 @@
+{
+  "record_id": "mercury.preflight.record/v1",
+  "checklist_id": "mercury.preflight/v1",
+  "statuses": {
+    "architecture": "PASS",
+    "scope": "PASS",
+    "schemas": "PASS",
+    "interfaces": "PASS",
+    "policies": "PASS",
+    "registries": "PASS",
+    "artifact_manifest": "PASS",
+    "environment": "PASS",
+    "dependency_lock": "PASS",
+    "repository_structure": "PASS",
+    "cpu_strategy": "PASS",
+    "remote_gpu_strategy": "PASS",
+    "benchmarks": "PASS",
+    "slos": "PASS",
+    "telemetry": "PASS",
+    "failure_model": "PASS",
+    "security": "PASS",
+    "testing": "PASS",
+    "certification": "PASS",
+    "cloud_budget_controls": "PASS",
+    "documentation": "PASS"
+  },
+  "passed": true,
+  "evidence": {
+    "architecture": [
+      "docs/MERCURY_X_MASTER_SPEC.md sections 3-9"
+    ],
+    "scope": [
+      "docs/MERCURY_X_MASTER_SPEC.md sections 2 and 6"
+    ],
+    "schemas": [
+      "tests/test_versioned_contracts.py versioned contract coverage",
+      "src/mercury/contracts/execution_graph.py"
+    ],
+    "interfaces": [
+      "tests/test_versioned_contracts.py physical execution-field rejection"
+    ],
+    "policies": [
+      "configs/policies/default_policy.json",
+      "tests/test_policy_slo_evaluation.py"
+    ],
+    "registries": [
+      "configs/registries/models.json",
+      "configs/registries/hardware.json",
+      "tests/test_registries.py"
+    ],
+    "artifact_manifest": [
+      "configs/artifacts/manifest.json",
+      "artifact manifest integrity evaluation: 21 required artifacts valid"
+    ],
+    "environment": [
+      "environment.md",
+      "tests/test_environment_reproducibility.py"
+    ],
+    "dependency_lock": [
+      "requirements.txt exact version pins",
+      ".venv\\Scripts\\python.exe -m pip check: No broken requirements found"
+    ],
+    "repository_structure": [
+      "git rev-parse --is-inside-work-tree: true",
+      "git branch --show-current: main"
+    ],
+    "cpu_strategy": [
+      "environment.md Execution Strategy",
+      "configs/hardware/providers.json local-cpu"
+    ],
+    "remote_gpu_strategy": [
+      "docs/HARDWARE_CLOUD_STRATEGY.md",
+      "tests/test_hardware_cloud_strategy.py"
+    ],
+    "benchmarks": [
+      "configs/benchmarks/workloads.json",
+      "tests/test_benchmark_workloads.py"
+    ],
+    "slos": [
+      "configs/slo/default_slo.json",
+      "tests/test_policy_slo_evaluation.py"
+    ],
+    "telemetry": [
+      "src/mercury/contracts/telemetry.py",
+      "tests/test_versioned_contracts.py"
+    ],
+    "failure_model": [
+      "docs/MERCURY_X_MASTER_SPEC.md sections 13-14",
+      "configs/policies/default_policy.json recovery_order"
+    ],
+    "security": [
+      ".env.example",
+      ".gitignore local secret and artifact rules"
+    ],
+    "testing": [
+      ".venv\\Scripts\\python.exe -m pytest tests -v: 61 passed"
+    ],
+    "certification": [
+      "src/mercury/certification/evaluator.py",
+      "tests/test_certification_framework.py"
+    ],
+    "cloud_budget_controls": [
+      "configs/hardware/providers.json cloud-gpu enabled false and cost_class PAID"
+    ],
+    "documentation": [
+      "docs/MERCURY_X_MASTER_SPEC.md",
+      "docs/HARDWARE_CLOUD_STRATEGY.md",
+      "docs/TESTING_CERTIFICATION_FRAMEWORK.md"
+    ]
+  }
+}

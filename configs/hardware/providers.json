@@ -1,0 +1,95 @@
+{
+  "providers": [
+    {
+      "provider_id": "local-cpu",
+      "provider_kind": "LOCAL_CPU",
+      "trust_level": "LOCAL_TRUSTED",
+      "enabled": true,
+      "supports_gpu": false,
+      "supports_cpu": true,
+      "supports_remote_execution": false,
+      "supports_persistent_workers": true,
+      "evidence_support": "MEASURED",
+      "cost_class": "FREE",
+      "secret_names": [],
+      "notes": "Primary control-plane and CPU development provider."
+    },
+    {
+      "provider_id": "local-gpu",
+      "provider_kind": "LOCAL_GPU",
+      "trust_level": "LOCAL_TRUSTED",
+      "enabled": false,
+      "supports_gpu": true,
+      "supports_cpu": true,
+      "supports_remote_execution": false,
+      "supports_persistent_workers": true,
+      "evidence_support": "MEASURED",
+      "cost_class": "FREE",
+      "secret_names": [],
+      "notes": "Disabled until a local discrete GPU is actually available."
+    },
+    {
+      "provider_id": "kaggle-gpu",
+      "provider_kind": "KAGGLE_GPU",
+      "trust_level": "APPROVED_REMOTE",
+      "enabled": true,
+      "supports_gpu": true,
+      "supports_cpu": true,
+      "supports_remote_execution": true,
+      "supports_persistent_workers": false,
+      "evidence_support": "MEASURED",
+      "cost_class": "FREE",
+      "secret_names": [
+        "KAGGLE_USERNAME",
+        "KAGGLE_KEY"
+      ],
+      "notes": "Preferred free remote GPU validation environment where suitable."
+    },
+    {
+      "provider_id": "colab-gpu",
+      "provider_kind": "COLAB_GPU",
+      "trust_level": "APPROVED_REMOTE",
+      "enabled": true,
+      "supports_gpu": true,
+      "supports_cpu": true,
+      "supports_remote_execution": true,
+      "supports_persistent_workers": false,
+      "evidence_support": "MEASURED",
+      "cost_class": "VARIABLE",
+      "secret_names": [],
+      "notes": "Secondary free/paid notebook GPU environment."
+    },
+    {
+      "provider_id": "friend-gpu",
+      "provider_kind": "FRIEND_GPU",
+      "trust_level": "APPROVED_REMOTE",
+      "enabled": false,
+      "supports_gpu": true,
+      "supports_cpu": true,
+      "supports_remote_execution": true,
+      "supports_persistent_workers": false,
+      "evidence_support": "MEASURED",
+      "cost_class": "FREE",
+      "secret_names": [
+        "MERCURY_FRIEND_WORKER_TOKEN"
+      ],
+      "notes": "Optional 4 GB NVIDIA validation worker for small GPU tests only."
+    },
+    {
+      "provider_id": "cloud-gpu",
+      "provider_kind": "CLOUD_GPU",
+      "trust_level": "EXTERNAL_CLOUD",
+      "enabled": false,
+      "supports_gpu": true,
+      "supports_cpu": true,
+      "supports_remote_execution": true,
+      "supports_persistent_workers": true,
+      "evidence_support": "BOTH",
+      "cost_class": "PAID",
+      "secret_names": [
+        "MERCURY_CLOUD_API_KEY"
+      ],
+      "notes": "Enable only when free/low-cost options cannot satisfy the benchmark or research need."
+    }
+  ]
+}

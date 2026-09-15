@@ -1,0 +1,42 @@
+{
+  "schema_version": "mercury.policy.set/v1",
+  "policy_id": "mercury-default-policy",
+  "version": "1",
+  "hard_constraints": {
+    "privacy": {
+      "operator": "eq",
+      "value": "organization-only"
+    },
+    "cost_per_request": {
+      "operator": "lte",
+      "value": 0.1
+    }
+  },
+  "optimization_objectives": [
+    {
+      "name": "latency_ms",
+      "direction": "minimize",
+      "weight": 0.4
+    },
+    {
+      "name": "quality",
+      "direction": "maximize",
+      "weight": 0.35
+    },
+    {
+      "name": "reliability",
+      "direction": "maximize",
+      "weight": 0.25
+    }
+  ],
+  "recovery_order": [
+    "RETRY",
+    "FALLBACK",
+    "RECOMPILE",
+    "RESCHEDULE",
+    "MIGRATE",
+    "DEGRADE",
+    "ABSTAIN",
+    "FAIL_SAFE"
+  ]
+}

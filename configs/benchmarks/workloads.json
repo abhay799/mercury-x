@@ -1,0 +1,493 @@
+{
+  "definitions": [
+    {
+      "benchmark_id": "bench-text-small-v1",
+      "category": "text_generation_small",
+      "description": "Canonical text generation small benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-text-small-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "text_generation",
+        "input": {
+          "text": "Synthetic text_generation_small benchmark input"
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 1200,
+        "quality_target": 0.8,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 50,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-text-small-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "medium",
+        "required_capabilities": [
+          "text_generation"
+        ],
+        "context_bytes": 0,
+        "latency_sensitive": false,
+        "quality_target": 0.8,
+        "privacy_level": "internal",
+        "required_tools": []
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    },
+    {
+      "benchmark_id": "bench-text-large-v1",
+      "category": "text_generation_large",
+      "description": "Canonical text generation large benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-text-large-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "text_generation",
+        "input": {
+          "text": "Synthetic text_generation_large benchmark input"
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 5000,
+        "quality_target": 0.9,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 50,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-text-large-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "high",
+        "required_capabilities": [
+          "text_generation",
+          "reasoning"
+        ],
+        "context_bytes": 0,
+        "latency_sensitive": false,
+        "quality_target": 0.9,
+        "privacy_level": "internal",
+        "required_tools": []
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU",
+        "REMOTE_GPU"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    },
+    {
+      "benchmark_id": "bench-embedding-v1",
+      "category": "embedding",
+      "description": "Canonical embedding benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-embedding-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "embedding",
+        "input": {
+          "text": "Synthetic embedding benchmark input"
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 800,
+        "quality_target": 0.85,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 50,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-embedding-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "medium",
+        "required_capabilities": [
+          "embedding"
+        ],
+        "context_bytes": 0,
+        "latency_sensitive": false,
+        "quality_target": 0.85,
+        "privacy_level": "internal",
+        "required_tools": []
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    },
+    {
+      "benchmark_id": "bench-rag-v1",
+      "category": "rag",
+      "description": "Canonical rag benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-rag-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "retrieval_augmented_generation",
+        "input": {
+          "text": "Synthetic rag benchmark input"
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 2500,
+        "quality_target": 0.9,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 50,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-rag-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "medium",
+        "required_capabilities": [
+          "embedding",
+          "retrieval",
+          "text_generation"
+        ],
+        "context_bytes": 128000,
+        "latency_sensitive": false,
+        "quality_target": 0.9,
+        "privacy_level": "internal",
+        "required_tools": []
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    },
+    {
+      "benchmark_id": "bench-classification-v1",
+      "category": "classification",
+      "description": "Canonical classification benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-classification-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "classification",
+        "input": {
+          "text": "Synthetic classification benchmark input"
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 700,
+        "quality_target": 0.9,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 50,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-classification-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "medium",
+        "required_capabilities": [
+          "classification"
+        ],
+        "context_bytes": 0,
+        "latency_sensitive": false,
+        "quality_target": 0.9,
+        "privacy_level": "internal",
+        "required_tools": []
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    },
+    {
+      "benchmark_id": "bench-batch-v1",
+      "category": "batch",
+      "description": "Canonical batch benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-batch-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "batch_inference",
+        "input": {
+          "records": [
+            "synthetic-1",
+            "synthetic-2",
+            "synthetic-3"
+          ]
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 10000,
+        "quality_target": 0.85,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 50,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-batch-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "medium",
+        "required_capabilities": [
+          "batch_inference"
+        ],
+        "context_bytes": 0,
+        "latency_sensitive": false,
+        "quality_target": 0.85,
+        "privacy_level": "internal",
+        "required_tools": []
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    },
+    {
+      "benchmark_id": "bench-latency-critical-v1",
+      "category": "latency_critical",
+      "description": "Canonical latency critical benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-latency-critical-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "classification",
+        "input": {
+          "text": "Synthetic latency_critical benchmark input"
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 300,
+        "quality_target": 0.85,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 95,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-latency-critical-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "medium",
+        "required_capabilities": [
+          "classification"
+        ],
+        "context_bytes": 0,
+        "latency_sensitive": true,
+        "quality_target": 0.85,
+        "privacy_level": "internal",
+        "required_tools": []
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    },
+    {
+      "benchmark_id": "bench-long-context-v1",
+      "category": "long_context",
+      "description": "Canonical long context benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-long-context-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "long_context_reasoning",
+        "input": {
+          "text": "Synthetic long_context benchmark input"
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 8000,
+        "quality_target": 0.9,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 50,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-long-context-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "high",
+        "required_capabilities": [
+          "long_context",
+          "reasoning"
+        ],
+        "context_bytes": 2000000,
+        "latency_sensitive": false,
+        "quality_target": 0.9,
+        "privacy_level": "internal",
+        "required_tools": []
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU",
+        "REMOTE_GPU"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    },
+    {
+      "benchmark_id": "bench-agent-tool-v1",
+      "category": "agent_tool",
+      "description": "Canonical agent tool benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-agent-tool-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "agent_tool_execution",
+        "input": {
+          "text": "Synthetic agent_tool benchmark input"
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 4000,
+        "quality_target": 0.9,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 50,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-agent-tool-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "medium",
+        "required_capabilities": [
+          "reasoning",
+          "tool_use"
+        ],
+        "context_bytes": 0,
+        "latency_sensitive": false,
+        "quality_target": 0.9,
+        "privacy_level": "internal",
+        "required_tools": [
+          "synthetic_search",
+          "synthetic_calculator"
+        ]
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    },
+    {
+      "benchmark_id": "bench-multi-model-dag-v1",
+      "category": "multi_model_dag",
+      "description": "Canonical multi model dag benchmark definition for MERCURY X pre-development evaluation.",
+      "request": {
+        "workload_id": "workload-multi-model-dag-v1",
+        "session_id": "benchmark-session-v1",
+        "task_type": "multi_model_dag",
+        "input": {
+          "text": "Synthetic multi_model_dag benchmark input"
+        },
+        "context": {
+          "benchmark": true
+        },
+        "latency_target_ms": 6000,
+        "quality_target": 0.93,
+        "cost_budget": 1.0,
+        "privacy_level": "internal",
+        "priority": 50,
+        "hardware_constraints": []
+      },
+      "profile": {
+        "workload_id": "workload-multi-model-dag-v1",
+        "required_modalities": [
+          "text"
+        ],
+        "reasoning_complexity": "high",
+        "required_capabilities": [
+          "vision",
+          "retrieval",
+          "reasoning",
+          "verification"
+        ],
+        "context_bytes": 256000,
+        "latency_sensitive": false,
+        "quality_target": 0.93,
+        "privacy_level": "internal",
+        "required_tools": []
+      },
+      "allowed_execution_modes": [
+        "LOCAL_CPU",
+        "REMOTE_GPU",
+        "SIMULATED"
+      ],
+      "required_metrics": [
+        "latency_ms",
+        "quality_score",
+        "cost_per_request",
+        "failure_rate"
+      ],
+      "evidence_state": "DEFINITION_ONLY"
+    }
+  ]
+}

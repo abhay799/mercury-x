@@ -1,0 +1,110 @@
+{
+  "checklist_id": "mercury.preflight/v1",
+  "items": [
+    {
+      "item_id": "architecture",
+      "description": "Architecture and control boundaries are documented.",
+      "required": true
+    },
+    {
+      "item_id": "scope",
+      "description": "Core scope and non-goals are documented and preserved.",
+      "required": true
+    },
+    {
+      "item_id": "schemas",
+      "description": "Versioned contracts are validated.",
+      "required": true
+    },
+    {
+      "item_id": "interfaces",
+      "description": "Core component interfaces are defined.",
+      "required": true
+    },
+    {
+      "item_id": "policies",
+      "description": "Hard constraints and policy evaluation are defined.",
+      "required": true
+    },
+    {
+      "item_id": "registries",
+      "description": "Model and hardware registries are validated.",
+      "required": true
+    },
+    {
+      "item_id": "artifact_manifest",
+      "description": "A machine-readable artifact manifest validates required artifacts.",
+      "required": true
+    },
+    {
+      "item_id": "environment",
+      "description": "Environment and dependencies are frozen.",
+      "required": true
+    },
+    {
+      "item_id": "dependency_lock",
+      "description": "Pinned dependency lock is present and documented.",
+      "required": true
+    },
+    {
+      "item_id": "repository_structure",
+      "description": "Repository structure and local version-control baseline exist.",
+      "required": true
+    },
+    {
+      "item_id": "cpu_strategy",
+      "description": "CPU-first local development strategy is documented.",
+      "required": true
+    },
+    {
+      "item_id": "remote_gpu_strategy",
+      "description": "Remote GPU strategy is modular and documented.",
+      "required": true
+    },
+    {
+      "item_id": "benchmarks",
+      "description": "Benchmark workload definitions exist.",
+      "required": true
+    },
+    {
+      "item_id": "slos",
+      "description": "SLO definitions and evaluation exist.",
+      "required": true
+    },
+    {
+      "item_id": "telemetry",
+      "description": "Telemetry contract exists.",
+      "required": true
+    },
+    {
+      "item_id": "failure_model",
+      "description": "Failure and recovery policy is documented.",
+      "required": true
+    },
+    {
+      "item_id": "security",
+      "description": "Security and privacy baseline is documented.",
+      "required": true
+    },
+    {
+      "item_id": "testing",
+      "description": "Unit and regression testing strategy exists.",
+      "required": true
+    },
+    {
+      "item_id": "certification",
+      "description": "Certification gate is machine-checkable.",
+      "required": true
+    },
+    {
+      "item_id": "cloud_budget_controls",
+      "description": "Paid cloud is disabled by default and controlled.",
+      "required": true
+    },
+    {
+      "item_id": "documentation",
+      "description": "Required pre-development documentation is present.",
+      "required": true
+    }
+  ]
+}

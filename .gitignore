@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.pytest-cache-local/
+.pytest-tmp/
+.coverage
+htmlcov/
+
+# MERCURY X local virtual environment
+.venv/
+venv/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+credentials/
+tokens/
+*.token
+token.txt
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+
+# Runtime / telemetry / logs
+logs/
+*.log
+telemetry/local/
+artifacts/runtime/
+checkpoints/local/
+
+# Local caches
+.cache/
+tmp/
+temp/
+.superpowers/
+
+# Notebook checkpoints
+.ipynb_checkpoints/

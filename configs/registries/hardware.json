@@ -1,0 +1,32 @@
+[
+  {
+    "schema_version": "mercury.hardware.profile/v1",
+    "hardware_id": "sim-cpu-worker-16gb",
+    "provider": "simulation",
+    "hardware_type": "CPU",
+    "vendor": null,
+    "architecture": "virtual",
+    "memory_gb": 16.0,
+    "available_memory_gb": 12.0,
+    "supported_precisions": ["fp32", "int8"],
+    "topology_tags": ["virtual", "local-simulation"],
+    "runtime_tags": ["python", "cpu"],
+    "capability_labels": ["SIMULATED"],
+    "evidence_type": "SIMULATED"
+  },
+  {
+    "schema_version": "mercury.hardware.profile/v1",
+    "hardware_id": "sim-gpu-worker-16gb",
+    "provider": "simulation",
+    "hardware_type": "GPU",
+    "vendor": null,
+    "architecture": "virtual",
+    "memory_gb": 16.0,
+    "available_memory_gb": 14.0,
+    "supported_precisions": ["fp32", "fp16", "bf16", "int8"],
+    "topology_tags": ["virtual", "remote-simulation"],
+    "runtime_tags": ["simulated-gpu"],
+    "capability_labels": ["SIMULATED"],
+    "evidence_type": "SIMULATED"
+  }
+]
