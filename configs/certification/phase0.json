@@ -1,0 +1,70 @@
+{
+  "schema_version": "mercury.certification.phase0/v1",
+  "gates": [
+    {
+      "gate_id": "context_boundary",
+      "passed": true,
+      "evidence": "tests/test_context_boundary.py"
+    },
+    {
+      "gate_id": "recovery_state",
+      "passed": true,
+      "evidence": "tests/test_runtime_recovery_state.py"
+    },
+    {
+      "gate_id": "decision_provenance",
+      "passed": true,
+      "evidence": "tests/test_decision_provenance.py"
+    },
+    {
+      "gate_id": "prerequisite_validation",
+      "passed": true,
+      "evidence": "tests/test_runtime_prerequisites.py"
+    },
+    {
+      "gate_id": "trace_context",
+      "passed": true,
+      "evidence": "tests/test_trace_context.py"
+    },
+    {
+      "gate_id": "runtime_events",
+      "passed": true,
+      "evidence": "tests/test_runtime_events.py"
+    },
+    {
+      "gate_id": "telemetry_evidence",
+      "passed": true,
+      "evidence": "tests/test_telemetry_evidence.py"
+    },
+    {
+      "gate_id": "slo_evidence",
+      "passed": true,
+      "evidence": "tests/test_slo_evidence.py"
+    },
+    {
+      "gate_id": "failure_scenarios",
+      "passed": true,
+      "evidence": "tests/test_failure_scenarios.py"
+    },
+    {
+      "gate_id": "full_regression_suite",
+      "passed": true,
+      "evidence": "python -m pytest tests -q completed successfully"
+    },
+    {
+      "gate_id": "artifact_integrity",
+      "passed": true,
+      "evidence": "Phase 0 contracts reject invalid identity, integrity, and secret-bearing evidence"
+    },
+    {
+      "gate_id": "documentation",
+      "passed": true,
+      "evidence": "docs/superpowers/plans/2026-09-16-phase0-task1-context-boundary.md through task10-integration-certification.md"
+    },
+    {
+      "gate_id": "git_cleanliness_evidence",
+      "passed": true,
+      "evidence": "Working tree scope verified as limited to Phase 0 Task 10 files"
+    }
+  ]
+}
