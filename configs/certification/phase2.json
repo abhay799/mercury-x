@@ -1,0 +1,19 @@
+{
+  "schema_version": "mercury.certification.phase2/v1",
+  "gates": [
+    {"gate_id": "workload_intelligence_contract", "passed": true, "evidence": "tests/test_workload_intelligence_models.py"},
+    {"gate_id": "signal_extraction", "passed": true, "evidence": "tests/test_workload_signal_extraction.py"},
+    {"gate_id": "intelligence_inference", "passed": true, "evidence": "tests/test_workload_intelligence_inference.py"},
+    {"gate_id": "confidence_evidence_calibration", "passed": true, "evidence": "tests/test_workload_intelligence_calibration.py"},
+    {"gate_id": "pipeline_integration", "passed": true, "evidence": "tests/test_workload_intelligence_pipeline.py"},
+    {"gate_id": "failure_edge_cases", "passed": true, "evidence": "tests/test_workload_intelligence_failures.py"},
+    {"gate_id": "identity_consistency", "passed": true, "evidence": "Task 1 through Task 6 preserve or fail closed on request, workload, and session identity."},
+    {"gate_id": "determinism", "passed": true, "evidence": "Phase 2 tests prove equal canonical inputs yield equal immutable outputs."},
+    {"gate_id": "evidence_provenance", "passed": true, "evidence": "Task 1 evidence, Task 2 signal evidence, Task 3 profile evidence, and Task 4 calibration decisions are nonblank."},
+    {"gate_id": "fail_closed_behavior", "passed": true, "evidence": "tests/test_workload_intelligence_failures.py proves unsafe states produce explicit failure."},
+    {"gate_id": "boundary_compliance", "passed": true, "evidence": "Phase 2 contracts expose computation characteristics only and no concrete resource selection fields."},
+    {"gate_id": "full_regression_suite", "passed": true, "evidence": "python -m pytest tests -q completed successfully for the Phase 2 baseline."},
+    {"gate_id": "documentation", "passed": true, "evidence": "docs/superpowers/plans/2026-09-16-phase2-task1-workload-intelligence-contract.md through task7-certification.md"}
+  ],
+  "boundary_violations": []
+}
