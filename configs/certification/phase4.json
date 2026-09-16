@@ -1,0 +1,21 @@
+{
+  "schema_version": "mercury.certification.phase4/v1",
+  "gates": [
+    {"gate_id": "capability_contract", "passed": true, "evidence": "tests/test_model_capabilities.py"},
+    {"gate_id": "capability_registry", "passed": true, "evidence": "tests/test_model_capability_registry.py"},
+    {"gate_id": "compatibility_evaluation", "passed": true, "evidence": "tests/test_model_capability_compatibility.py"},
+    {"gate_id": "candidate_discovery", "passed": true, "evidence": "tests/test_model_capability_discovery.py"},
+    {"gate_id": "evidence_trust", "passed": true, "evidence": "tests/test_model_capability_evidence.py"},
+    {"gate_id": "integration_failure_hardening", "passed": true, "evidence": "tests/test_model_capability_integration_failures.py"},
+    {"gate_id": "identity_consistency", "passed": true, "evidence": "Phase 4 integration tests preserve provider, model_id, family, and revision across registry, compatibility, and discovery."},
+    {"gate_id": "provenance_consistency", "passed": true, "evidence": "Capability and evidence provenance remain immutable and unchanged throughout the Phase 4 lifecycle."},
+    {"gate_id": "status_consistency", "passed": true, "evidence": "Production-only constraints reject planned, research, simulated, and experimental records without status promotion."},
+    {"gate_id": "determinism", "passed": true, "evidence": "Canonical tuple ordering, exact identities, stable fingerprints, and repeatable assessments are covered by Tasks 1 through 6."},
+    {"gate_id": "fail_closed_behavior", "passed": true, "evidence": "Malformed capabilities, conflicts, hard incompatibility, discovery bypass, and invalid evidence fail closed in Task 6."},
+    {"gate_id": "boundary_compliance", "passed": true, "evidence": "Phase 4 artifacts contain no ranking, preference scoring, selection, graph assignment, fallback, hardware placement, scheduler, or runtime decisions."},
+    {"gate_id": "full_regression_suite", "passed": true, "evidence": "python -m pytest tests -q completed successfully for the Phase 4 baseline."},
+    {"gate_id": "documentation", "passed": true, "evidence": "docs/superpowers/plans/2026-09-16-phase4-task1-model-capability-contract.md through phase4-task7-certification.md"}
+  ],
+  "certification_violations": [],
+  "boundary_violations": []
+}
