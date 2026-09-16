@@ -46,7 +46,7 @@ def test_minimal_and_multiple_explicit_requirements_are_compatible() -> None:
         ({"required_input_modalities": (ModelModality.IMAGE,)}, {}, "input_modality"),
         ({"required_output_modalities": (ModelModality.STRUCTURED_DATA,)}, {}, "output_modality"),
         ({"required_reasoning_capabilities": (ReasoningCapability.PLANNING,)}, {}, "reasoning_capability"),
-        ({"requires_tool_use": True}, {"supports_tool_use": False}, "tool_use"),
+        ({"requires_tool_use": True}, {"supports_tool_use": False, "supports_structured_tool_arguments": False, "supports_tool_result_consumption": False}, "tool_use"),
         ({"requires_retrieval": True}, {"supports_retrieval": False}, "retrieval"),
         ({"requires_code_generation": True}, {"supports_code_generation": False}, "code_generation"),
         ({"requires_json_output": True}, {"supports_json_output": False}, "json_output"),

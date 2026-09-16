@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Iterable, Literal, TypeVar
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 
 from mercury.contracts.base import ContractModel
 
@@ -130,6 +130,17 @@ class ModelCapabilityRecord(ContractModel):
         if value is not None and (isinstance(value, bool) or value <= 0):
             raise ValueError("declared limits must be positive integers")
         return value
+
+    @model_validator(mode="after")
+    def tool_metadata_requires_tool_use(self) -> ModelCapabilityRecord:
+        if (
+            self.supports_structured_tool_arguments
+            or self.supports_tool_result_consumption
+        ) and not self.supports_tool_use:
+            raise ValueError(
+                "structured tool metadata requires declared tool use support"
+            )
+        return self
 
     @property
     def is_proven_production(self) -> bool:
