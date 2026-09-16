@@ -7,7 +7,11 @@ from enum import Enum
 
 from mercury.graph.models import ExecutionGraph, Evidence
 from mercury.graph.transformation import ExecutionGraphTransformationResult
-from mercury.graph.validation import ExecutionGraphValidationResult, GraphValidationStatus
+from mercury.graph.validation import (
+    ExecutionGraphValidationResult,
+    GraphValidationStatus,
+    validate_execution_graph,
+)
 
 
 class GraphReadinessStatus(str, Enum):
@@ -89,7 +93,14 @@ def evaluate_graph_readiness(
     identity = (graph.request_id, graph.workload_id, graph.session_id)
     identity_valid = all(isinstance(value, str) and value.strip() for value in identity) and isinstance(graph.graph_id, str) and bool(graph.graph_id.strip())
     check("identity", identity_valid and validation.graph_id == graph.graph_id, "graph and validation identities must be nonblank and consistent", "validation")
-    check("semantic_validation", validation.status is GraphValidationStatus.PASS, "Task 3 semantic validation must PASS", "validation")
+    current_validation = validate_execution_graph(graph)
+    check(
+        "semantic_validation",
+        validation.status is GraphValidationStatus.PASS
+        and current_validation.status is GraphValidationStatus.PASS,
+        "supplied and current Task 3 semantic validation must PASS",
+        "validation",
+    )
 
     graph_provenance_valid = bool(graph.provenance) and all(isinstance(item, Evidence) and item.source.strip() and item.reason.strip() for item in graph.provenance)
     nodes_provenance_valid = all(node.evidence and all(isinstance(item, Evidence) and item.source.strip() and item.reason.strip() for item in node.evidence) for node in graph.nodes)
@@ -108,7 +119,16 @@ def evaluate_graph_readiness(
             transformation_reason = "transformation artifact is unsupported"
     check("transformation", transformation_valid, transformation_reason, "transformation")
 
-    leaked = tuple(sorted(_FORBIDDEN_FIELDS.intersection(vars(graph))))
+    artifact_fields = set(vars(graph))
+    for node in graph.nodes:
+        artifact_fields.update(vars(node))
+    for edge in graph.edges:
+        artifact_fields.update(vars(edge))
+    if transformation is not None:
+        artifact_fields.update(vars(transformation))
+        for record in transformation.records:
+            artifact_fields.update(vars(record))
+    leaked = tuple(sorted(_FORBIDDEN_FIELDS.intersection(artifact_fields)))
     check("phase_boundary", not leaked, "logical graph must not expose physical execution decision fields", "graph")
 
     status = GraphReadinessStatus.BLOCKED if issues else GraphReadinessStatus.READY
