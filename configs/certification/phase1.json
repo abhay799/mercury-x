@@ -1,0 +1,71 @@
+{
+  "schema_version": "mercury.certification.phase1/v1",
+  "gates": [
+    {
+      "gate_id": "gateway_envelope_identity",
+      "passed": true,
+      "evidence": "tests/test_gateway_request_envelope.py"
+    },
+    {
+      "gate_id": "input_normalization",
+      "passed": true,
+      "evidence": "tests/test_gateway_normalization.py"
+    },
+    {
+      "gate_id": "request_validation",
+      "passed": true,
+      "evidence": "tests/test_gateway_validation.py"
+    },
+    {
+      "gate_id": "session_idempotency",
+      "passed": true,
+      "evidence": "tests/test_gateway_session_idempotency.py"
+    },
+    {
+      "gate_id": "constraint_canonicalization",
+      "passed": true,
+      "evidence": "tests/test_gateway_constraints.py"
+    },
+    {
+      "gate_id": "gateway_admission",
+      "passed": true,
+      "evidence": "tests/test_gateway_admission.py"
+    },
+    {
+      "gate_id": "gateway_security",
+      "passed": true,
+      "evidence": "tests/test_gateway_security.py"
+    },
+    {
+      "gate_id": "gateway_handoff",
+      "passed": true,
+      "evidence": "tests/test_gateway_handoff.py"
+    },
+    {
+      "gate_id": "end_to_end_integration",
+      "passed": true,
+      "evidence": "tests/test_phase1_gateway_integration.py"
+    },
+    {
+      "gate_id": "identity_consistency",
+      "passed": true,
+      "evidence": "Request, workload, session, owner, and tenant identity remain consistent through the gateway handoff"
+    },
+    {
+      "gate_id": "boundary_compliance",
+      "passed": true,
+      "evidence": "Phase 1 exposes no model selection, hardware selection, Workload Intelligence, execution graph, scheduler, or workload execution fields"
+    },
+    {
+      "gate_id": "full_regression_suite",
+      "passed": true,
+      "evidence": "python -m pytest tests -q completed successfully"
+    },
+    {
+      "gate_id": "documentation",
+      "passed": true,
+      "evidence": "docs/superpowers/plans/2026-09-16-phase1-task1-gateway-envelope.md through task10-certification.md"
+    }
+  ],
+  "boundary_violations": []
+}
