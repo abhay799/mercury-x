@@ -168,8 +168,24 @@ def calibrate_workload_intelligence(
         failures.append(("tool_requirements", "tool capability is unsupported by explicit tool signals"))
     if not signals.context_references and ComputationalCapability.RETRIEVAL in profile.required_capabilities:
         failures.append(("required_capabilities", "retrieval capability lacks explicit retrieval evidence"))
-    if not signals.structured_output_required and ComputationalCapability.STRUCTURED_OUTPUT in profile.required_capabilities:
+    if (
+        not signals.structured_output_required
+        and not signals.structured_data_present
+        and ComputationalCapability.STRUCTURED_OUTPUT in profile.required_capabilities
+    ):
         failures.append(("required_capabilities", "structured-output capability lacks explicit output evidence"))
+    if (
+        not (signals.image_input_present or signals.video_input_present)
+        and ComputationalCapability.VISION in profile.required_capabilities
+    ):
+        failures.append(("required_capabilities", "vision capability lacks explicit visual evidence"))
+    if not signals.audio_input_present and ComputationalCapability.SPEECH in profile.required_capabilities:
+        failures.append(("required_capabilities", "speech capability lacks explicit audio evidence"))
+    if (
+        "code_execution" not in signals.declared_tool_names
+        and ComputationalCapability.CODE_EXECUTION in profile.required_capabilities
+    ):
+        failures.append(("required_capabilities", "code-execution capability lacks explicit code-execution evidence"))
     if signals.latency_constraint is None and profile.latency_sensitivity.value == "realtime":
         failures.append(("latency_sensitivity", "realtime sensitivity lacks explicit latency evidence"))
     if signals.quality_constraint is None and profile.quality_requirement.value == "critical":
