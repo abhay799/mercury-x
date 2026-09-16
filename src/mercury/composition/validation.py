@@ -176,6 +176,7 @@ _FORBIDDEN_FIELDS: Final[frozenset[str]] = frozenset(
         "rank",
         "score",
         "winner",
+        "best_model",
         "preferred_candidate",
         "selected_model",
         "fallback_ordering",
