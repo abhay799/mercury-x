@@ -114,7 +114,11 @@ def build_execution_graph(
         ExecutionGraphEdge(
             source_node_id=nodes[index].node_id,
             target_node_id=nodes[index + 1].node_id,
-            dependency_type=GraphDependencyType.DATA,
+            dependency_type=(
+                GraphDependencyType.TOOL_RESULT
+                if nodes[index].node_type is GraphNodeType.TOOL
+                else GraphDependencyType.DATA
+            ),
             evidence=(Evidence("phase2.intelligence", "logical data dependency follows deterministic stage order"),),
         )
         for index in range(len(nodes) - 1)
