@@ -1,0 +1,21 @@
+{
+  "schema_version": "mercury.certification.phase3/v1",
+  "gates": [
+    {"gate_id": "execution_graph_contract", "passed": true, "evidence": "tests/test_execution_graph_models.py"},
+    {"gate_id": "graph_construction", "passed": true, "evidence": "tests/test_execution_graph_builder.py"},
+    {"gate_id": "dependency_dataflow_validation", "passed": true, "evidence": "tests/test_execution_graph_validation.py"},
+    {"gate_id": "controlled_graph_transformation", "passed": true, "evidence": "tests/test_execution_graph_transformation.py"},
+    {"gate_id": "graph_readiness", "passed": true, "evidence": "tests/test_execution_graph_readiness.py"},
+    {"gate_id": "failure_adversarial_baseline", "passed": true, "evidence": "tests/test_execution_graph_failures.py"},
+    {"gate_id": "identity_consistency", "passed": true, "evidence": "Graph, validation, transformation, and readiness preserve or fail closed on request, workload, and session identity."},
+    {"gate_id": "topology_invariants", "passed": true, "evidence": "Task 3 and Task 6 tests prove DAG, entry/exit, reachability, and no orphan processing invariants."},
+    {"gate_id": "capability_coverage", "passed": true, "evidence": "Task 2 and Task 3 tests cover logical retrieval, tool, structured-output, and vision requirements."},
+    {"gate_id": "determinism", "passed": true, "evidence": "Phase 3 contracts use deterministic logical IDs, sorted collections, and repeatable validation results."},
+    {"gate_id": "provenance_completeness", "passed": true, "evidence": "Graph, node, transformation, readiness, and certification evidence are nonblank."},
+    {"gate_id": "fail_closed_behavior", "passed": true, "evidence": "tests/test_execution_graph_failures.py proves unsafe lifecycle states cannot become READY."},
+    {"gate_id": "boundary_compliance", "passed": true, "evidence": "Phase 3 logical graph artifacts contain no concrete model, resource, placement, scheduler, or runtime decisions."},
+    {"gate_id": "full_regression_suite", "passed": true, "evidence": "python -m pytest tests -q completed successfully for the Phase 3 baseline."},
+    {"gate_id": "documentation", "passed": true, "evidence": "docs/superpowers/plans/2026-09-16-phase3-task1-execution-graph-contract.md through task7-certification.md"}
+  ],
+  "boundary_violations": []
+}
