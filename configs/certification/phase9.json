@@ -1,0 +1,114 @@
+{
+  "gates": [
+    {
+      "gate_id": "memory_types",
+      "passed": true,
+      "evidence": "exact six certified global memory types verified"
+    },
+    {
+      "gate_id": "namespaces",
+      "passed": true,
+      "evidence": "exact TENANT WORKSPACE PROJECT namespaces verified"
+    },
+    {
+      "gate_id": "lifecycle",
+      "passed": true,
+      "evidence": "exact five lifecycle states verified"
+    },
+    {
+      "gate_id": "conflict_states",
+      "passed": true,
+      "evidence": "CLEAR and CONFLICTING states verified"
+    },
+    {
+      "gate_id": "statuses",
+      "passed": true,
+      "evidence": "READY NOT_APPLICABLE FAIL statuses verified"
+    },
+    {
+      "gate_id": "store_limit",
+      "passed": true,
+      "evidence": "4096 records per exact namespace enforced"
+    },
+    {
+      "gate_id": "retrieval_limit",
+      "passed": true,
+      "evidence": "128 global retrieval record cap enforced"
+    },
+    {
+      "gate_id": "promotion_limit",
+      "passed": true,
+      "evidence": "128 Phase 8 promotion source cap enforced"
+    },
+    {
+      "gate_id": "consolidation_limit",
+      "passed": true,
+      "evidence": "256 consolidation input cap enforced"
+    },
+    {
+      "gate_id": "deterministic_identity",
+      "passed": true,
+      "evidence": "deterministic global identity and fingerprints verified"
+    },
+    {
+      "gate_id": "explicit_promotion",
+      "passed": true,
+      "evidence": "global persistence requires explicit promotion"
+    },
+    {
+      "gate_id": "namespace_authorization",
+      "passed": true,
+      "evidence": "exact namespace authorization enforced"
+    },
+    {
+      "gate_id": "namespace_isolation",
+      "passed": true,
+      "evidence": "tenant workspace project isolation verified"
+    },
+    {
+      "gate_id": "secret_rejection",
+      "passed": true,
+      "evidence": "credential password token API key and private key promotion rejected"
+    },
+    {
+      "gate_id": "immutable_versioning",
+      "passed": true,
+      "evidence": "immutable versioning and supersession lineage verified"
+    },
+    {
+      "gate_id": "conflict_preservation",
+      "passed": true,
+      "evidence": "conflicting evidence preserved without winner selection"
+    },
+    {
+      "gate_id": "deterministic_retrieval",
+      "passed": true,
+      "evidence": "structured bounded canonical retrieval verified"
+    },
+    {
+      "gate_id": "governance",
+      "passed": true,
+      "evidence": "expiry revocation tombstone and namespace closure verified"
+    },
+    {
+      "gate_id": "forbidden_global_scope",
+      "passed": true,
+      "evidence": "USER_PROFILE and unscoped global memory absent"
+    },
+    {
+      "gate_id": "no_semantic_ranking",
+      "passed": true,
+      "evidence": "semantic and vector ranking excluded from Phase 9"
+    },
+    {
+      "gate_id": "no_execution_control",
+      "passed": true,
+      "evidence": "model hardware scheduler and runtime control excluded"
+    },
+    {
+      "gate_id": "adversarial_integration",
+      "passed": true,
+      "evidence": "Phase 9 integration and adversarial boundaries verified"
+    }
+  ]
+}
