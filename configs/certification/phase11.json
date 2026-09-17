@@ -1,0 +1,199 @@
+{
+  "gates": [
+    {
+      "gate_id": "reuse_modes",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "cache_states",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "limits",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "semantic_identity",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "cache_entry_identity",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "metadata_size",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "namespace_authorization",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "namespace_isolation",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "closed_namespace",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "source_lineage",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "exact_compatibility",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "semantic_compatibility",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "physical_kv_compatibility",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "model_identity",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "model_version",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "tokenizer_identity",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "precision",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "attention_layout",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "kv_format",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "context_generation",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "payload_reference",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "payload_fingerprint",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "store_capacity",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "lookup_limit",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "source_limit",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "dependency_limit",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "lookup_ordering",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "stale_exclusion",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "invalidated_exclusion",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "deterministic_invalidation",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "dependency_invalidation",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "prediction_hint_only",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "no_semantic_only_physical_reuse",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "no_model_selection",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "no_precision_conversion",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "no_hardware_placement",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "no_scheduler_runtime",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "no_user_profile_prediction",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    },
+    {
+      "gate_id": "adversarial_integration",
+      "passed": true,
+      "evidence": "verified by Phase 11 focused and integration tests"
+    }
+  ]
+}
