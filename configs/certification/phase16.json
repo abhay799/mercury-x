@@ -1,0 +1,10 @@
+{
+  "required_gates": [
+    "states",
+    "bounded_fanout",
+    "determinism",
+    "verification_before_commit",
+    "single_winner",
+    "no_migration"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "required_gates": [
+    "contracts",
+    "determinism",
+    "uncalibrated",
+    "eligibility",
+    "no_execution"
+  ]
+}

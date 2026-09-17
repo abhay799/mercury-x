@@ -1,0 +1,13 @@
+{
+  "required_gates": [
+    "exact_enums",
+    "graph_identity",
+    "node_link_integrity",
+    "locality",
+    "reachability",
+    "metrics_unknown",
+    "phase13_integration",
+    "no_placement",
+    "no_scheduler"
+  ]
+}
