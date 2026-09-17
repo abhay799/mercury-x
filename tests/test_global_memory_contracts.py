@@ -29,3 +29,18 @@ def test_query_rejects_malformed_structured_retrieval_filters():
  with pytest.raises(Exception): GlobalMemoryQuery(**common,source_artifact_id="")
  with pytest.raises(Exception): GlobalMemoryQuery(**common,source_phase8_record_ids=("phase8","phase8"))
  with pytest.raises(Exception): GlobalMemoryQuery(**common,record_version=0)
+
+def test_consolidation_contract_preserves_source_traceability():
+ result=GlobalConsolidationResult(status=GlobalMemoryPhaseStatus.READY,record=record(),namespace_type=GlobalMemoryNamespace.PROJECT,namespace_id="n",source_global_record_ids=("global-b","global-a"),source_record_versions=(2,1),source_provenance=(("evidence-b",),("evidence-a",)),source_conflict_states=(GlobalMemoryConflictState.CONFLICTING,GlobalMemoryConflictState.CLEAR),consolidation_method_id="method",consolidation_method_version="v1")
+ assert result.source_global_record_ids==("global-a","global-b")
+ assert result.source_record_versions==(1,2)
+ assert result.source_provenance==(("evidence-a",),("evidence-b",))
+ assert result.source_conflict_states==(GlobalMemoryConflictState.CLEAR,GlobalMemoryConflictState.CONFLICTING)
+
+def test_consolidation_contract_rejects_malformed_traceability():
+ common=dict(status=GlobalMemoryPhaseStatus.READY,record=record(),namespace_type=GlobalMemoryNamespace.PROJECT,namespace_id="n",source_global_record_ids=("global-a",),source_record_versions=(1,),source_provenance=(("evidence",),),source_conflict_states=(GlobalMemoryConflictState.CLEAR,),consolidation_method_id="method",consolidation_method_version="v1")
+ with pytest.raises(Exception): GlobalConsolidationResult(**common,source_global_record_ids=())
+ with pytest.raises(Exception): GlobalConsolidationResult(**common,source_record_versions=(0,))
+ with pytest.raises(Exception): GlobalConsolidationResult(**common,source_provenance=((),))
+ with pytest.raises(Exception): GlobalConsolidationResult(**common,source_conflict_states=())
+ with pytest.raises(Exception): GlobalConsolidationResult(**common,consolidation_method_id="")
