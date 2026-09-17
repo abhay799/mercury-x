@@ -1,0 +1,134 @@
+{
+  "gates": [
+    {
+      "gate_id": "horizons",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "confidence_bands",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "limits",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "candidate_identity",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "prediction_identity",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "namespace_authorization",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "namespace_isolation",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "closed_namespace",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "lifecycle_eligibility",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "source_traceability",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "source_immutability",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "deterministic_features",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "bounded_confidence",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "deterministic_confidence_band",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "deterministic_horizon",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "reason_codes",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "conflict_preservation",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "prediction_ordering",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "prediction_limit",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "source_limit",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "no_semantic_ranking",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "no_memory_persistence",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "no_prefetch_cache",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "no_execution_control",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "no_user_profile_prediction",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    },
+    {
+      "gate_id": "adversarial_integration",
+      "passed": true,
+      "evidence": "verified by Phase 10 focused and integration tests"
+    }
+  ]
+}
