@@ -12,3 +12,6 @@ def test_locked_vocabularies_limits_and_determinism():
 def test_promotion_request_represents_authorized_namespace_separately():
  request=GlobalPromotionRequest(namespace_type=GlobalMemoryNamespace.PROJECT,namespace_id="target",authorized_namespace_type=GlobalMemoryNamespace.PROJECT,authorized_namespace_id="caller",source_phase8_record_ids=("r",),promotion_policy_id="p",retention_policy_id="r",memory_type=GlobalMemoryType.PROJECT_CONTEXT,context_key="k",source_session_id="s",promotable=True)
  assert request.authorized_namespace_id=="caller"
+def test_query_represents_authorization_separately():
+ query=GlobalMemoryQuery(namespace_type=GlobalMemoryNamespace.PROJECT,namespace_id="target",authorized_namespace_type=GlobalMemoryNamespace.PROJECT,authorized_namespace_id="caller")
+ assert query.authorized_namespace_id=="caller" and query.limit==128

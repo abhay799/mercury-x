@@ -28,7 +28,11 @@ class GlobalPromotionRequest(ContractModel):
  @classmethod
  def promotion_text(cls,v): return _text(v)
 class GlobalPromotionResult(ContractModel): status:GlobalMemoryPhaseStatus;record:GlobalContextRecord|None=None;reason:str|None=None
-class GlobalMemoryQuery(ContractModel): namespace_type:GlobalMemoryNamespace;namespace_id:str;limit:int=Field(default=128,ge=1,le=128)
+class GlobalMemoryQuery(ContractModel):
+ namespace_type:GlobalMemoryNamespace;namespace_id:str;authorized_namespace_type:GlobalMemoryNamespace;authorized_namespace_id:str;limit:int=Field(default=128,ge=1,le=128)
+ @field_validator("namespace_id","authorized_namespace_id")
+ @classmethod
+ def query_text(cls,v): return _text(v)
 class GlobalMemoryRetrievalResult(ContractModel): status:GlobalMemoryPhaseStatus;records:tuple[GlobalContextRecord,...]
 class GlobalConsolidationRequest(ContractModel): namespace_type:GlobalMemoryNamespace;namespace_id:str;source_record_ids:tuple[str,...];method_id:str;method_version:str;context_key:str;memory_type:GlobalMemoryType
 class GlobalConsolidationResult(ContractModel): status:GlobalMemoryPhaseStatus;record:GlobalContextRecord|None=None
