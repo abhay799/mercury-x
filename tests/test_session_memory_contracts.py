@@ -1,6 +1,7 @@
 import pytest
 from mercury.session_memory.contracts import SessionMemoryType,SessionMemoryScope,SessionMemoryLifecycle,SessionMemoryPhaseStatus,MAX_SESSION_MEMORY_RECORDS,MAX_RETRIEVED_RECORDS,MAX_COMPACTION_INPUT_RECORDS,SessionMemoryRecord,session_memory_record_id
 from mercury.session_memory.contracts import SessionMemoryQuery
+from mercury.session_memory.contracts import SessionMemoryCompactionRequest,SessionMemoryCompactionResult
 def record(**u):
  v=dict(session_id="session",task_id="task",turn_id="turn",record_id="sha256:"+"0"*64,record_version=1,source_phase="phase",source_artifact_id="artifact",memory_type=SessionMemoryType.OBSERVATION,scope=SessionMemoryScope.SESSION,creation_sequence=1,lifecycle=SessionMemoryLifecycle.ACTIVE,provenance=("evidence",));v.update(u);return SessionMemoryRecord(**v)
 def test_locked_vocabularies_and_limits():
@@ -21,3 +22,8 @@ def test_query_and_record_expose_canonical_structured_retrieval_metadata():
  assert query.memory_types==(SessionMemoryType.OBSERVATION,SessionMemoryType.TOOL_RESULT)
  assert record(source_lineage_id="lineage",retrieval_key="key").retrieval_key=="key"
  with pytest.raises(Exception): SessionMemoryQuery(session_id="session",turn_id_min="z",turn_id_max="a")
+def test_compaction_contract_preserves_explicit_scope_method_and_lineage():
+ request=SessionMemoryCompactionRequest(session_id="s",source_record_ids=("b","a"),target_scope=SessionMemoryScope.TASK,target_task_id="t",compaction_method_id="method",compaction_method_version="v1")
+ assert request.source_record_ids==("a","b")
+ result=SessionMemoryCompactionResult(status=SessionMemoryPhaseStatus.READY,source_record_ids=("a",),source_record_versions=(1,),source_lineage_ids=("lineage",),target_scope=SessionMemoryScope.SESSION,compaction_method_id="method",compaction_method_version="v1")
+ assert result.source_record_versions==(1,)

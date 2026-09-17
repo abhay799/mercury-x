@@ -43,8 +43,29 @@ class SessionMemoryQuery(ContractModel):
   if v is not None and lower is not None and lower>v: raise ValueError("turn_id_min must not exceed turn_id_max")
   return v
 class SessionMemoryRetrievalResult(ContractModel): status:SessionMemoryPhaseStatus; records:tuple[SessionMemoryRecord,...]; provenance:tuple[str,...]=()
-class SessionMemoryCompactionRequest(ContractModel): session_id:str; records:tuple[SessionMemoryRecord,...]
-class SessionMemoryCompactionResult(ContractModel): status:SessionMemoryPhaseStatus; record:SessionMemoryRecord|None=None; reason:str|None=None
+class SessionMemoryCompactionRequest(ContractModel):
+ session_id:str; source_record_ids:tuple[str,...]; target_scope:SessionMemoryScope; compaction_method_id:str; compaction_method_version:str; target_task_id:str|None=None; target_turn_id:str|None=None
+ @field_validator("session_id","compaction_method_id","compaction_method_version","target_task_id","target_turn_id")
+ @classmethod
+ def compaction_text(cls,v): return None if v is None else _text(v)
+ @field_validator("source_record_ids")
+ @classmethod
+ def sources(cls,v):
+  if not v or any(not isinstance(x,str) or not x.strip() for x in v) or len(v)!=len(set(v)): raise ValueError("source record ids must be nonblank and unique")
+  return tuple(sorted(v))
+ @field_validator("target_turn_id")
+ @classmethod
+ def scope_ids(cls,v,info):
+  scope=info.data.get("target_scope")
+  if scope is SessionMemoryScope.TURN and v is None: raise ValueError("TURN compaction requires target_turn_id")
+  return v
+class SessionMemoryCompactionResult(ContractModel):
+ status:SessionMemoryPhaseStatus; record:SessionMemoryRecord|None=None; reason:str|None=None; source_record_ids:tuple[str,...]=(); source_record_versions:tuple[int,...]=(); source_lineage_ids:tuple[str,...]=(); target_scope:SessionMemoryScope|None=None; compaction_method_id:str|None=None; compaction_method_version:str|None=None
+ @field_validator("source_record_versions")
+ @classmethod
+ def versions(cls,v):
+  if any(not isinstance(x,int) or isinstance(x,bool) or x<=0 for x in v): raise ValueError("source versions must be positive")
+  return tuple(v)
 class SessionMemoryLifecycleResult(ContractModel): status:SessionMemoryPhaseStatus; record:SessionMemoryRecord|None=None; reason:str|None=None
 class SessionMemoryLimitMetadata(ContractModel): max_records:int=Field(ge=1,le=MAX_SESSION_MEMORY_RECORDS); max_retrieved_records:int=Field(ge=1,le=MAX_RETRIEVED_RECORDS); max_compaction_input_records:int=Field(ge=1,le=MAX_COMPACTION_INPUT_RECORDS)
 def canonical_session_memory_payload(record):
