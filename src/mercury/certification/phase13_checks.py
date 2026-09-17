@@ -1,10 +1,13 @@
 from mercury.hardware_personality.affinity import derive_workload_affinities
 from mercury.hardware_personality.capabilities import build_capability_matrix, resolve_capability
 from mercury.hardware_personality.compatibility import evaluate_hardware_compatibility
+from mercury.hardware_personality.compatibility import requirement_from_phase12_segment
 from mercury.hardware_personality.contracts import (
     CapabilitySupportState, HardwareAffinityLevel, HardwareClass,
     HardwareCompatibilityState, HardwareEvidenceClass, HardwarePrecision,
     HardwareRequirement, HardwareTrustState,
+    HardwareMeasurementContext,
+    make_measurement_context_id,
 )
 from mercury.hardware_personality.lifecycle import (
     build_hardware_personality_profile, evaluate_profile_staleness,
@@ -134,54 +137,58 @@ def measured_lineage():
 
 
 def boundary_no_side_effects():
-    import inspect
-    import mercury.hardware_personality.compatibility as c
-    text = inspect.getsource(c)
-    forbidden = ("subprocess", "requests.", "boto", "schedule(", "migrate(", "provision(")
-    return not any(token in text for token in forbidden), "no execution/scheduling/provider side effects"
+    descriptor = _descriptor()
+    rejected = True
+    for forbidden in ("model_id", "placement", "scheduler", "runtime_process", "migration"):
+        try:
+            type(descriptor).model_validate(descriptor.model_dump() | {forbidden: "forbidden"})
+            rejected = False
+        except ValueError:
+            pass
+    return rejected, "contracts behaviorally reject Phase 14+ decision and execution fields"
+
+
+def measurement_context_behavior():
+    descriptor = _descriptor()
+    values = dict(
+        benchmark_id="cert-benchmark", benchmark_version="v1",
+        runtime_applicable=True, runtime_id="cert-runtime", runtime_version="v1",
+        driver_applicable=False, software_stack_applicable=True,
+        software_stack_id="cert-stack", software_stack_version="v1",
+        precision_applicable=True, precision_mode=HardwarePrecision.FP32,
+        environment_applicable=False, hardware_profile_generation=1,
+        evidence_generation=1, provenance_ids=("cert",),
+    )
+    first = HardwareMeasurementContext(context_id=make_measurement_context_id(**values), **values)
+    changed = values | {"runtime_version": "v2"}
+    second = HardwareMeasurementContext(context_id=make_measurement_context_id(**changed), **changed)
+    missing_rejected = False
+    try:
+        _evidence(descriptor, "memory.bandwidth_bytes_per_s", "80", cls=HardwareEvidenceClass.MEASURED, benchmark_id="cert-benchmark")
+    except ValueError:
+        missing_rejected = True
+    return first.context_id != second.context_id and missing_rejected, "typed measurement context changes semantic identity and is mandatory for measured evidence"
+
+
+def phase12_requirement_behavior():
+    from tests._phase12_helpers import make_segment
+    segment = make_segment()
+    requirement = requirement_from_phase12_segment(segment)
+    return requirement.requirement_id == f"phase12:{segment.segment_id}", "Phase 12 identity is preserved without inferred hardware semantics"
 
 
 CHECKS = {
-    "hardware_classes": exact_enums,
-    "evidence_classes": exact_enums,
-    "trust_states": exact_enums,
-    "capability_states": exact_enums,
-    "precision_identifiers": exact_enums,
-    "affinity_dimensions": affinity_evidence,
-    "affinity_scale": affinity_evidence,
+    "certified_vocabularies": exact_enums,
     "hardware_identity": deterministic_identity,
     "evidence_identity": evidence_identity,
-    "profile_identity": lifecycle_behavior,
-    "profile_fingerprint": lifecycle_behavior,
-    "descriptor_normalization": deterministic_identity,
-    "declared_measured_separation": measured_lineage,
-    "evidence_lineage": measured_lineage,
-    "evidence_conflict_preservation": conflict_preserved,
-    "unknown_insufficient_evidence": unknown_without_evidence,
-    "precision_resolution": compatibility_behavior,
-    "memory_capability": compatibility_behavior,
-    "runtime_capability": unknown_without_evidence,
-    "software_stack": unknown_without_evidence,
-    "interconnect_capability": conflict_preserved,
-    "virtualization": compatibility_behavior,
-    "cpu_probe_path": cpu_probe,
-    "synthetic_accelerators": exact_enums,
-    "affinity_determinism": affinity_evidence,
+    "measurement_context": measurement_context_behavior,
+    "conflict_preservation": conflict_preserved,
+    "unknown_without_evidence": unknown_without_evidence,
+    "cpu_probe": cpu_probe,
     "affinity_evidence": affinity_evidence,
-    "compatibility_determinism": compatibility_behavior,
-    "compatibility_unknown": unknown_without_evidence,
-    "phase12_requirement_integration": boundary_no_side_effects,
-    "profile_generation": lifecycle_behavior,
-    "trust_transitions": lifecycle_behavior,
-    "deterministic_staleness": lifecycle_behavior,
-    "invalid_terminality": lifecycle_behavior,
-    "no_model_selection": boundary_no_side_effects,
-    "no_precision_selection": boundary_no_side_effects,
-    "no_provider_selection": boundary_no_side_effects,
-    "no_region_selection": boundary_no_side_effects,
-    "no_hardware_placement": boundary_no_side_effects,
-    "no_global_scheduling": boundary_no_side_effects,
-    "no_migration": boundary_no_side_effects,
-    "no_autonomous_scaling": boundary_no_side_effects,
-    "adversarial_integration": conflict_preserved,
+    "compatibility": compatibility_behavior,
+    "profile_lifecycle": lifecycle_behavior,
+    "measured_lineage": measured_lineage,
+    "phase12_requirement": phase12_requirement_behavior,
+    "phase_boundary": boundary_no_side_effects,
 }

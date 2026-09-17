@@ -13,5 +13,7 @@ def node_from_hardware_profile(profile: HardwarePersonalityProfile, **locality):
     return TopologyNode(
         topology_node_id=make_topology_node_id(profile.hardware_profile_id),
         hardware_profile_id=profile.hardware_profile_id,
+        hardware_profile_generation=profile.profile_generation,
+        hardware_profile_fingerprint=profile.profile_fingerprint,
         **locality,
     )

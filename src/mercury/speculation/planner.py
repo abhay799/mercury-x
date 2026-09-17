@@ -1,6 +1,6 @@
 from mercury.disaggregated_execution.contracts import ExecutionSegment, ExecutionSegmentState
 from mercury.placement.contracts import PlacementCandidate
-from mercury.speculation.contracts import SpeculationPlan, sh
+from mercury.speculation.contracts import SpeculationPlan, SpeculationUpstreamProvenance, sh
 
 
 def _candidate_fingerprint(candidate: PlacementCandidate) -> str:
@@ -17,6 +17,8 @@ def build_speculation_plan(
     verification_policy_id="verify",
     commit_policy_id="first_verified",
     cancellation_policy_id="cancel_losers",
+    placement_predictions=None,
+    path_results=None,
 ):
     if (source_segment is None) != (placement_candidates is None):
         raise ValueError("typed source segment and placement candidates must be supplied together")
@@ -47,6 +49,47 @@ def build_speculation_plan(
         candidate_fingerprints = tuple(
             (candidate.candidate_id, _candidate_fingerprint(candidate)) for candidate in candidates
         )
+        predictions_by_id = {
+            prediction.candidate_id: prediction for prediction in tuple(placement_predictions or ())
+        }
+        if predictions_by_id and set(predictions_by_id) != set(ids):
+            raise ValueError("placement predictions must match candidate set")
+        paths_by_id = {path.path_result_id: path for path in tuple(path_results or ())}
+        typed_candidates = tuple(candidate for candidate in candidates if candidate.path_result_id is not None)
+        if typed_candidates and (not predictions_by_id or set(paths_by_id) != {candidate.path_result_id for candidate in typed_candidates}):
+            raise ValueError("typed candidates require exact path results and placement predictions")
+        for candidate in typed_candidates:
+            path = paths_by_id[candidate.path_result_id]
+            prediction = predictions_by_id[candidate.candidate_id]
+            if (
+                path.fingerprint != candidate.path_result_fingerprint
+                or path.graph_id != candidate.topology_graph_id
+                or path.graph_generation != candidate.topology_generation
+                or path.destination_node_id != candidate.topology_node_id
+            ):
+                raise ValueError("foreign or stale path result")
+            if (
+                prediction.hardware_profile_generation != candidate.hardware_profile_generation
+                or prediction.topology_generation != candidate.topology_generation
+            ):
+                raise ValueError("placement prediction provenance mismatch")
+        upstream_provenance = tuple(
+            SpeculationUpstreamProvenance(
+                candidate_id=candidate.candidate_id,
+                candidate_fingerprint=dict(candidate_fingerprints)[candidate.candidate_id],
+                hardware_profile_id=candidate.hardware_profile_id,
+                hardware_profile_generation=candidate.hardware_profile_generation,
+                hardware_profile_fingerprint=candidate.hardware_profile_fingerprint,
+                topology_graph_id=candidate.topology_graph_id,
+                topology_generation=candidate.topology_generation,
+                path_result_id=candidate.path_result_id,
+                path_result_fingerprint=candidate.path_result_fingerprint,
+                prediction_id=predictions_by_id[candidate.candidate_id].prediction_id if candidate.candidate_id in predictions_by_id else None,
+                prediction_fingerprint=sh({"placement_prediction": predictions_by_id[candidate.candidate_id].model_dump(mode="json")}) if candidate.candidate_id in predictions_by_id else None,
+            )
+            for candidate in candidates
+            if candidate.path_result_id is not None
+        )
         source_segment_id = source_segment.segment_id
         source_execution_plan_id = source_segment.execution_plan_id
         namespace_type = source_segment.namespace_type
@@ -63,6 +106,7 @@ def build_speculation_plan(
         namespace_type = None
         namespace_id = None
         source_segment_fingerprint = None
+        upstream_provenance = ()
 
     values = {
         "source_segment_id": source_segment_id,
@@ -76,11 +120,13 @@ def build_speculation_plan(
         "namespace_type": namespace_type,
         "namespace_id": namespace_id,
         "source_segment_fingerprint": source_segment_fingerprint,
+        "upstream_provenance": upstream_provenance,
     }
     fingerprint = sh(
         {
             **values,
             "namespace_type": namespace_type.value if namespace_type else None,
+            "upstream_provenance": [item.model_dump(mode="json") for item in upstream_provenance],
         }
     )
     return SpeculationPlan(

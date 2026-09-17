@@ -5,7 +5,7 @@ from mercury.disaggregated_execution.contracts import ExecutionSegment
 from mercury.disaggregated_execution.readiness import evaluate_segment_readiness
 from mercury.hardware_personality.contracts import HardwarePersonalityProfile
 from mercury.topology.contracts import TopologyGraph, TopologyCapabilityState
-from mercury.topology.paths import path_capability, path_metrics
+from mercury.topology.paths import build_path_result, path_capability
 
 def generate_candidates(*, segment, requirement, profiles_by_node):
     out=[]
@@ -45,14 +45,18 @@ def generate_typed_candidates(
             continue
         if path_capability(topology_graph, source_node_id, node_id) is not TopologyCapabilityState.AVAILABLE:
             continue
-        metrics = path_metrics(topology_graph, source_node_id, node_id)
-        evidence_ids = tuple(metrics["evidence_ids"]) if metrics is not None else ()
+        path_result = build_path_result(topology_graph, source_node_id, node_id)
+        evidence_ids = path_result.metric_evidence_ids
         candidate_id = stable_hash({
             "segment_id": segment.segment_id,
             "topology_graph_id": topology_graph.topology_graph_id,
             "topology_generation": topology_graph.generation,
             "node_id": node_id,
             "hardware_profile_id": profile.hardware_profile_id,
+            "hardware_profile_generation": profile.profile_generation,
+            "hardware_profile_fingerprint": profile.profile_fingerprint,
+            "path_result_id": path_result.path_result_id,
+            "path_result_fingerprint": path_result.fingerprint,
         })
         candidates.append(PlacementCandidate(
             candidate_id=candidate_id,
@@ -63,6 +67,10 @@ def generate_typed_candidates(
             reason_codes=("HARD_REQUIREMENTS_SATISFIED",),
             topology_graph_id=topology_graph.topology_graph_id,
             topology_generation=topology_graph.generation,
+            hardware_profile_generation=profile.profile_generation,
+            hardware_profile_fingerprint=profile.profile_fingerprint,
+            path_result_id=path_result.path_result_id,
+            path_result_fingerprint=path_result.fingerprint,
             evidence_ids=evidence_ids,
         ))
     return tuple(candidates)

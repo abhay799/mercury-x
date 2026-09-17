@@ -1,10 +1,16 @@
 {
+  "schema_version": "mercury.phase16-certification/v1",
   "required_gates": [
     "states",
     "bounded_fanout",
     "determinism",
     "verification_before_commit",
     "single_winner",
+    "logical_exactly_once",
+    "accounting_metadata",
+    "branch_events",
+    "retry_policy",
+    "upstream_lineage",
     "no_migration"
   ]
 }

@@ -12,7 +12,13 @@ REQUIRED_PHASE15_GATE_IDS = (
     "determinism",
     "uncalibrated",
     "eligibility",
+    "typed_provenance",
+    "feature_provenance",
+    "backend_identity",
+    "score_bounds",
     "no_execution",
+    "explicit_backend_contracts",
+    "feature_completeness",
 )
 
 

@@ -3,6 +3,7 @@ from mercury.speculation.contracts import (
     SpeculativeBranch,
     SpeculativeBranchState,
     SpeculativeResult,
+    SpeculationAccounting,
     sh,
     speculative_result_payload,
 )
@@ -77,10 +78,26 @@ def commit_verified_winner(plan, branches):
         "winning_result_fingerprint": winner.result_fingerprint,
         "verification_evidence_id": winner.verification_evidence_id,
         "losing_branch_ids": losers,
+        "branch_count": len(branches),
+        "verified_success_count": len(eligible),
+        "accounting": SpeculationAccounting(
+            total_planned_branches=len(branches),
+            started_branches=sum(branch.state in {SpeculativeBranchState.RUNNING, SpeculativeBranchState.SUCCEEDED, SpeculativeBranchState.FAILED, SpeculativeBranchState.COMMITTED, SpeculativeBranchState.DISCARDED} for branch in branches),
+            succeeded_branches=sum(branch.state in {SpeculativeBranchState.SUCCEEDED, SpeculativeBranchState.COMMITTED} for branch in branches),
+            failed_branches=sum(branch.state is SpeculativeBranchState.FAILED for branch in branches),
+            verified_success_branches=len(eligible),
+            cancelled_branches=sum(branch.state is SpeculativeBranchState.CANCELLED for branch in branches),
+            discarded_branches=sum(branch.state is SpeculativeBranchState.DISCARDED for branch in branches),
+            authoritative_committed_branch_id=winner.branch_id,
+            verification_count=sum(branch.verification_evidence_id is not None for branch in branches),
+            verification_overhead_units=None,
+            speculative_resource_estimate_units=None,
+        ),
     }
     fingerprint_payload = {
         **values,
         "namespace_type": values["namespace_type"].value if values["namespace_type"] else None,
+        "accounting": values["accounting"].model_dump(mode="json"),
     }
     return SpeculativeResult(
         result_fingerprint=sh(fingerprint_payload),

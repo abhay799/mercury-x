@@ -7,6 +7,9 @@ from mercury.hardware_personality.contracts import (
     VirtualizationState,
     make_evidence_id,
     make_hardware_id,
+    HardwareMeasurementContext,
+    HardwarePrecision,
+    make_measurement_context_id,
 )
 from mercury.hardware_personality.lifecycle import build_hardware_personality_profile
 
@@ -36,6 +39,20 @@ def descriptor(hardware_class=HardwareClass.CPU, memory=16 * 1024**3):
 
 
 def evidence(desc, property_name, value, *, cls=HardwareEvidenceClass.PROBED, sequence=1, verified=True, benchmark_id=None):
+    measurement_context = None
+    if cls is HardwareEvidenceClass.MEASURED:
+        context_values = dict(
+            benchmark_id=benchmark_id or "fixture-benchmark", benchmark_version="v1",
+            runtime_applicable=True, runtime_id="fixture-runtime", runtime_version="v1",
+            driver_applicable=False, software_stack_applicable=True,
+            software_stack_id="fixture-stack", software_stack_version="v1",
+            precision_applicable=True, precision_mode=HardwarePrecision.FP32,
+            environment_applicable=False, hardware_profile_generation=1,
+            evidence_generation=1, provenance_ids=("fixture",),
+        )
+        measurement_context = HardwareMeasurementContext(
+            context_id=make_measurement_context_id(**context_values), **context_values
+        )
     evidence_id, fp = make_evidence_id(
         hardware_id=desc.hardware_id,
         evidence_class=cls,
@@ -45,6 +62,7 @@ def evidence(desc, property_name, value, *, cls=HardwareEvidenceClass.PROBED, se
         generation=1,
         declared_value=value if cls is HardwareEvidenceClass.DECLARED else None,
         observed_value=value if cls is not HardwareEvidenceClass.DECLARED else None,
+        measurement_context=measurement_context,
     )
     return HardwareEvidenceRecord(
         evidence_id=evidence_id,
@@ -55,11 +73,12 @@ def evidence(desc, property_name, value, *, cls=HardwareEvidenceClass.PROBED, se
         observed_value=value if cls is not HardwareEvidenceClass.DECLARED else None,
         source_id="fixture",
         probe_id="fixture-probe" if cls is HardwareEvidenceClass.PROBED else None,
-        benchmark_id=benchmark_id if cls is HardwareEvidenceClass.MEASURED else None,
+        benchmark_id=(benchmark_id or "fixture-benchmark") if cls is HardwareEvidenceClass.MEASURED else None,
         sequence=sequence,
         generation=1,
         verification_status=verified,
         evidence_fingerprint=fp,
+        measurement_context=measurement_context,
     )
 
 

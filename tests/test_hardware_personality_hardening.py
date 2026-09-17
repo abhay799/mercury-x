@@ -12,10 +12,88 @@ from mercury.hardware_personality.contracts import (
     HardwareEvidenceClass,
     HardwareEvidenceRecord,
     HardwarePersonalityProfile,
+    HardwarePrecision,
     HardwareRequirement,
     HardwareTrustState,
     make_evidence_id,
 )
+
+
+def test_measured_evidence_requires_typed_context_and_context_changes_identity():
+    from mercury.hardware_personality.contracts import (
+        HardwareMeasurementContext,
+        make_measurement_context_id,
+    )
+
+    desc = descriptor()
+    common = dict(
+        benchmark_id="memory-bandwidth",
+        benchmark_version="v1",
+        runtime_applicable=True,
+        runtime_id="runtime",
+        runtime_version="1",
+        driver_applicable=False,
+        software_stack_applicable=True,
+        software_stack_id="numpy",
+        software_stack_version="2",
+        precision_applicable=True,
+        precision_mode=HardwarePrecision.FP32,
+        environment_applicable=False,
+        hardware_profile_generation=1,
+        evidence_generation=1,
+        provenance_ids=("fixture",),
+    )
+    first = HardwareMeasurementContext(context_id=make_measurement_context_id(**common), **common)
+    changed = common | {"runtime_version": "2"}
+    second = HardwareMeasurementContext(context_id=make_measurement_context_id(**changed), **changed)
+    assert first.context_id != second.context_id
+
+    contextless_id, contextless_fp = make_evidence_id(
+        hardware_id=desc.hardware_id, evidence_class=HardwareEvidenceClass.MEASURED,
+        property_name="memory_bandwidth_bytes_per_s", source_id="fixture", sequence=1,
+        generation=1, observed_value="100",
+    )
+    with pytest.raises(ValueError, match="measurement context"):
+        HardwareEvidenceRecord(
+            evidence_id=contextless_id, hardware_id=desc.hardware_id,
+            evidence_class=HardwareEvidenceClass.MEASURED,
+            property_name="memory_bandwidth_bytes_per_s", observed_value="100",
+            source_id="fixture", benchmark_id="memory-bandwidth", sequence=1, generation=1,
+            verification_status=True, evidence_fingerprint=contextless_fp,
+        )
+
+    first_id, first_fp = make_evidence_id(
+        hardware_id=desc.hardware_id, evidence_class=HardwareEvidenceClass.MEASURED,
+        property_name="memory_bandwidth_bytes_per_s", source_id="fixture", sequence=1,
+        generation=1, observed_value="100", measurement_context=first,
+    )
+    second_id, _ = make_evidence_id(
+        hardware_id=desc.hardware_id, evidence_class=HardwareEvidenceClass.MEASURED,
+        property_name="memory_bandwidth_bytes_per_s", source_id="fixture", sequence=1,
+        generation=1, observed_value="100", measurement_context=second,
+    )
+    assert first_id != second_id
+    measured = HardwareEvidenceRecord(
+        evidence_id=first_id, hardware_id=desc.hardware_id,
+        evidence_class=HardwareEvidenceClass.MEASURED,
+        property_name="memory_bandwidth_bytes_per_s", observed_value="100",
+        source_id="fixture", benchmark_id="memory-bandwidth", sequence=1, generation=1,
+        verification_status=True, evidence_fingerprint=first_fp, measurement_context=first,
+    )
+    assert measured.measurement_context == first
+    derived_id, derived_fp = make_evidence_id(
+        hardware_id=desc.hardware_id, evidence_class=HardwareEvidenceClass.DERIVED,
+        property_name="memory.class", source_id="derived", sequence=2, generation=1,
+        observed_value="high", derived_from_evidence_ids=(measured.evidence_id,),
+    )
+    derived = HardwareEvidenceRecord(
+        evidence_id=derived_id, hardware_id=desc.hardware_id,
+        evidence_class=HardwareEvidenceClass.DERIVED, property_name="memory.class",
+        observed_value="high", source_id="derived", sequence=2, generation=1,
+        verification_status=True, evidence_fingerprint=derived_fp,
+        derived_from_evidence_ids=(measured.evidence_id,),
+    )
+    assert derived.derived_from_evidence_ids == (measured.evidence_id,)
 from mercury.hardware_personality.lifecycle import (
     build_hardware_personality_profile,
     transition_hardware_trust,
@@ -151,6 +229,36 @@ def test_profile_rejects_derived_evidence_whose_source_is_not_present():
     )
     with pytest.raises(ValueError, match="derived evidence source missing"):
         build_hardware_personality_profile(descriptor=desc, evidence=(derived,))
+
+
+def test_profile_rejects_unverified_or_generation_stale_derived_sources():
+    desc = descriptor()
+    source = evidence(desc, "source.capability", "supported", verified=False)
+    derived_id, derived_fingerprint = make_evidence_id(
+        hardware_id=desc.hardware_id,
+        evidence_class=HardwareEvidenceClass.DERIVED,
+        property_name="derived.capability",
+        source_id="deriver",
+        sequence=2,
+        generation=2,
+        observed_value="supported",
+        derived_from_evidence_ids=(source.evidence_id,),
+    )
+    derived = HardwareEvidenceRecord(
+        evidence_id=derived_id,
+        hardware_id=desc.hardware_id,
+        evidence_class=HardwareEvidenceClass.DERIVED,
+        property_name="derived.capability",
+        observed_value="supported",
+        source_id="deriver",
+        sequence=2,
+        generation=2,
+        verification_status=True,
+        evidence_fingerprint=derived_fingerprint,
+        derived_from_evidence_ids=(source.evidence_id,),
+    )
+    with pytest.raises(ValueError, match="verified source evidence"):
+        build_hardware_personality_profile(descriptor=desc, evidence=(source, derived))
 
 
 def test_declared_evidence_cannot_claim_an_observation():

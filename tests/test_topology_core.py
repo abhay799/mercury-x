@@ -2,7 +2,9 @@ import pytest
 from mercury.topology.contracts import *
 from mercury.topology.graph import build_topology_graph
 from mercury.topology.locality import classify_locality
-from mercury.topology.paths import find_path, path_metrics, path_capability
+from mercury.topology.paths import (
+    build_path_result, find_path, path_metrics, path_capability, validate_current_path_result,
+)
 from mercury.topology.integration import node_from_hardware_profile
 from mercury.hardware_personality.contracts import HardwarePersonalityProfile
 from mercury.hardware_personality.lifecycle import transition_hardware_trust
@@ -181,3 +183,44 @@ def test_phase13_stale_and_invalid_profiles_cannot_be_integrated_into_topology()
     forged = HardwarePersonalityProfile.model_construct(**raw)
     with pytest.raises(ValueError, match="integrity"):
         node_from_hardware_profile(forged)
+
+
+def test_phase13_node_binding_preserves_profile_generation_and_fingerprint():
+    hardware_profile = profile()
+    topology_node = node_from_hardware_profile(hardware_profile)
+    assert topology_node.hardware_profile_generation == hardware_profile.profile_generation
+    assert topology_node.hardware_profile_fingerprint == hardware_profile.profile_fingerprint
+
+
+def test_path_result_is_immutable_content_addressed_and_refresh_invalidates_stale_artifact():
+    first_link = TopologyLink(
+        topology_link_id=make_topology_link_id("n1", "n2", TopologyLinkKind.ETHERNET, False),
+        source_node_id="n1", destination_node_id="n2", link_kind=TopologyLinkKind.ETHERNET,
+        bidirectional=False, measured_bandwidth_bytes_per_s=80, measured_latency_us=2,
+        evidence_ids=("measurement-1",),
+    )
+    graph = build_topology_graph(nodes=(node(2), node(1)), links=(first_link,), generation=1)
+    result = build_path_result(graph, "n1", "n2", provenance_ids=("topology-probe",))
+    assert result.ordered_node_ids == ("n1", "n2")
+    assert result.ordered_link_ids == (first_link.topology_link_id,)
+    assert result.measured_bottleneck_bandwidth_bytes_per_s == 80
+    assert build_path_result(graph, "n1", "n2", provenance_ids=("topology-probe",)) == result
+    with pytest.raises(Exception):
+        result.graph_generation = 2
+
+    forged = result.model_dump() | {"fingerprint": "forged"}
+    with pytest.raises(ValueError, match="fingerprint"):
+        PathResult.model_validate(forged)
+
+    refreshed_graph = build_topology_graph(nodes=graph.nodes, links=graph.links, generation=2)
+    with pytest.raises(ValueError, match="stale"):
+        validate_current_path_result(result, refreshed_graph)
+    refreshed = build_path_result(refreshed_graph, "n1", "n2", provenance_ids=("topology-probe",))
+    assert refreshed.path_result_id != result.path_result_id
+
+
+def test_path_result_distinguishes_unknown_unreachable_and_preserves_direction():
+    graph = build_topology_graph(nodes=(node(1), node(2), node(3)), links=(link("n1", "n2", bidir=False),))
+    assert build_path_result(graph, "missing", "n1").capability_state is TopologyCapabilityState.UNKNOWN
+    assert build_path_result(graph, "n1", "n3").capability_state is TopologyCapabilityState.UNAVAILABLE
+    assert build_path_result(graph, "n2", "n1").capability_state is TopologyCapabilityState.UNAVAILABLE

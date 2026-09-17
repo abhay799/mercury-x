@@ -5,9 +5,14 @@ from mercury.speculation.contracts import (
     SpeculationPlan,
     SpeculativeBranch,
     SpeculativeBranchState,
+    SpeculativeBranchEventType,
+    SpeculationRetryMetadata,
+    SpeculationUpstreamProvenance,
 )
+from mercury.speculation.events import apply_branch_event, make_branch_event
 from mercury.speculation.planner import build_speculation_plan
 from mercury.speculation.state import transition_branch
+from mercury.speculation.ledger import LogicalCommitLedger
 
 
 def _raises_value_error(operation) -> bool:
@@ -129,11 +134,71 @@ def single_winner():
     return duplicate and unknown and repeated, "unique in-plan winner and no duplicate commit"
 
 
+def logical_exactly_once():
+    plan = _plan()
+    branches = (
+        _successful("branch-1", "candidate-1", "result-1"),
+        SpeculativeBranch(branch_id="branch-2", placement_candidate_id="candidate-2", state=SpeculativeBranchState.FAILED),
+    )
+    ledger = LogicalCommitLedger()
+    first = ledger.commit(plan, branches)
+    replay = ledger.commit(plan, branches)
+    competing = (
+        branches[0].model_copy(update={"verified": False, "verification_evidence_id": None}),
+        _successful("branch-2", "candidate-2", "result-2"),
+    )
+    rejected = _raises_value_error(lambda: ledger.commit(plan, competing))
+    return first == replay and rejected, "logical commit replay is idempotent and competing winner is rejected"
+
+
+def accounting_metadata():
+    plan = _plan()
+    result = commit_verified_winner(
+        plan,
+        (_successful("branch-1", "candidate-1", "result-1"), _successful("branch-2", "candidate-2", "result-2")),
+    )
+    return result.branch_count == 2 and result.verified_success_count == 2, "branch and verification accounting is explicit"
+
+
 def no_migration():
     import inspect
     import mercury.speculation.commit as commit
 
     return "migrate(" not in inspect.getsource(commit), "no migration behavior"
+
+
+def branch_events():
+    plan = _plan(("candidate-1",))
+    branch = SpeculativeBranch(
+        branch_id="branch-1", placement_candidate_id="candidate-1",
+        state=SpeculativeBranchState.PLANNED, speculation_plan_id=plan.speculation_plan_id,
+        source_segment_id=plan.source_segment_id, plan_fingerprint=plan.fingerprint,
+        candidate_fingerprint=dict(plan.candidate_fingerprints)["candidate-1"], generation=1,
+    )
+    event = make_branch_event(branch=branch, target_state=SpeculativeBranchState.READY,
+                              event_sequence=1, provenance_ids=("cert",))
+    transitioned = apply_branch_event(branch, event)
+    stale = _raises_value_error(lambda: apply_branch_event(transitioned, event))
+    return event.event_type is SpeculativeBranchEventType.READY and transitioned.state is SpeculativeBranchState.READY and stale, "branch events are typed, content-addressed, and reject stale replay"
+
+
+def retry_policy():
+    baseline = SpeculationRetryMetadata()
+    attempted = _raises_value_error(lambda: SpeculationRetryMetadata(retry_supported=True, retry_attempt=1, maximum_attempts=1))
+    return not baseline.retry_supported and attempted, "Phase 16 retry is explicitly unsupported and hidden retries reject"
+
+
+def upstream_lineage():
+    provenance = SpeculationUpstreamProvenance(
+        candidate_id="candidate-1", candidate_fingerprint="candidate-fingerprint",
+        hardware_profile_id="profile", hardware_profile_generation=1,
+        hardware_profile_fingerprint="profile-fingerprint", topology_graph_id="graph",
+        topology_generation=1, path_result_id="path", path_result_fingerprint="path-fingerprint",
+        prediction_id="prediction", prediction_fingerprint="prediction-fingerprint",
+    )
+    plan = _plan(("candidate-1",))
+    payload = plan.model_dump() | {"upstream_provenance": (provenance,)}
+    return _raises_value_error(lambda: SpeculationPlan.model_validate(payload)), "foreign upstream lineage cannot be attached without changing the content-addressed plan"
 
 
 CHECKS = {
@@ -142,5 +207,10 @@ CHECKS = {
     "determinism": determinism,
     "verification_before_commit": verification_before_commit,
     "single_winner": single_winner,
+    "logical_exactly_once": logical_exactly_once,
+    "accounting_metadata": accounting_metadata,
+    "branch_events": branch_events,
+    "retry_policy": retry_policy,
+    "upstream_lineage": upstream_lineage,
     "no_migration": no_migration,
 }

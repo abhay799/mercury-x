@@ -1,4 +1,5 @@
 {
+  "schema_version": "mercury.phase14-certification/v1",
   "required_gates": [
     "exact_enums",
     "graph_identity",
@@ -13,6 +14,8 @@
     "metrics_unknown",
     "declared_measured_metrics",
     "path_provenance",
+    "path_result_contract",
+    "path_refresh",
     "phase13_integration",
     "graph_generation",
     "permutation_invariance",

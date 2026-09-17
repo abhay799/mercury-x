@@ -5,6 +5,12 @@
     "determinism",
     "uncalibrated",
     "eligibility",
-    "no_execution"
+    "typed_provenance",
+    "feature_provenance",
+    "backend_identity",
+    "score_bounds",
+    "no_execution",
+    "explicit_backend_contracts",
+    "feature_completeness"
   ]
 }

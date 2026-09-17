@@ -79,6 +79,66 @@ class VirtualizationState(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class HardwareMeasurementContext(ContractModel):
+    context_id: str
+    benchmark_id: str
+    benchmark_version: str
+    runtime_applicable: bool
+    runtime_id: str | None = None
+    runtime_version: str | None = None
+    driver_applicable: bool
+    driver_id: str | None = None
+    driver_version: str | None = None
+    software_stack_applicable: bool
+    software_stack_id: str | None = None
+    software_stack_version: str | None = None
+    precision_applicable: bool
+    precision_mode: HardwarePrecision | None = None
+    environment_applicable: bool
+    environment_id: str | None = None
+    hardware_profile_generation: int = Field(ge=1)
+    evidence_generation: int = Field(ge=1)
+    provenance_ids: tuple[str, ...]
+
+    @field_validator(
+        "context_id", "benchmark_id", "benchmark_version", "runtime_id", "runtime_version",
+        "driver_id", "driver_version", "software_stack_id", "software_stack_version",
+        "environment_id",
+    )
+    @classmethod
+    def context_text(cls, value, info):
+        return None if value is None else _nonblank(value, info.field_name)
+
+    @field_validator("provenance_ids")
+    @classmethod
+    def context_provenance(cls, value):
+        result = _canonical_strings(value, "provenance_ids")
+        if not result:
+            raise ValueError("measurement context requires provenance")
+        return result
+
+    @model_validator(mode="after")
+    def validate_applicability_and_identity(self):
+        pairs = (
+            ("runtime", self.runtime_applicable, self.runtime_id, self.runtime_version),
+            ("driver", self.driver_applicable, self.driver_id, self.driver_version),
+            ("software_stack", self.software_stack_applicable, self.software_stack_id, self.software_stack_version),
+        )
+        for name, applicable, identity, version in pairs:
+            if applicable != (identity is not None and version is not None):
+                raise ValueError(f"{name} applicability does not match identity/version")
+        if self.precision_applicable != (self.precision_mode is not None):
+            raise ValueError("precision applicability does not match precision_mode")
+        if self.environment_applicable != (self.environment_id is not None):
+            raise ValueError("environment applicability does not match environment_id")
+        expected = make_measurement_context_id(**{
+            key: value for key, value in self.model_dump().items() if key != "context_id"
+        })
+        if self.context_id != expected:
+            raise ValueError("measurement context identity mismatch")
+        return self
+
+
 def _nonblank(value: str, field: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field} must be nonblank")
@@ -156,6 +216,7 @@ class HardwareEvidenceRecord(ContractModel):
     verification_status: bool
     evidence_fingerprint: str
     derived_from_evidence_ids: tuple[str, ...] = ()
+    measurement_context: HardwareMeasurementContext | None = None
 
     @field_validator("evidence_id", "hardware_id", "property_name", "source_id", "evidence_fingerprint")
     @classmethod
@@ -193,6 +254,15 @@ class HardwareEvidenceRecord(ContractModel):
             raise ValueError("only DERIVED evidence may include source evidence lineage")
         if self.evidence_class is HardwareEvidenceClass.MEASURED and self.benchmark_id is None:
             raise ValueError("MEASURED evidence requires benchmark_id")
+        if self.evidence_class is HardwareEvidenceClass.MEASURED:
+            if self.measurement_context is None:
+                raise ValueError("MEASURED evidence requires measurement context")
+            if self.benchmark_id != self.measurement_context.benchmark_id:
+                raise ValueError("measurement context benchmark mismatch")
+            if self.generation != self.measurement_context.evidence_generation:
+                raise ValueError("measurement context generation mismatch")
+        elif self.measurement_context is not None:
+            raise ValueError("measurement context is only valid for MEASURED evidence")
         if self.evidence_class is HardwareEvidenceClass.PROBED and self.probe_id is None:
             raise ValueError("PROBED evidence requires probe_id")
         expected_id, expected_fingerprint = make_evidence_id(
@@ -205,6 +275,7 @@ class HardwareEvidenceRecord(ContractModel):
             declared_value=self.declared_value,
             observed_value=self.observed_value,
             derived_from_evidence_ids=self.derived_from_evidence_ids,
+            measurement_context=self.measurement_context,
         )
         if self.evidence_id != expected_id or self.evidence_fingerprint != expected_fingerprint:
             raise ValueError("evidence identity does not match evidence content")
@@ -406,6 +477,7 @@ def make_evidence_id(
     declared_value: str | None = None,
     observed_value: str | None = None,
     derived_from_evidence_ids: tuple[str, ...] = (),
+    measurement_context: HardwareMeasurementContext | None = None,
 ) -> tuple[str, str]:
     payload = {
         "hardware_id": _nonblank(hardware_id, "hardware_id"),
@@ -419,9 +491,30 @@ def make_evidence_id(
         "derived_from_evidence_ids": list(
             _canonical_strings(derived_from_evidence_ids, "derived_from_evidence_ids")
         ),
+        "measurement_context": measurement_context.model_dump(mode="json") if measurement_context else None,
     }
     fingerprint = _stable_hash(payload)
     return fingerprint, fingerprint
+
+
+def make_measurement_context_id(**values) -> str:
+    keys = (
+        "benchmark_id", "benchmark_version", "runtime_applicable", "runtime_id", "runtime_version",
+        "driver_applicable", "driver_id", "driver_version", "software_stack_applicable",
+        "software_stack_id", "software_stack_version", "precision_applicable", "precision_mode",
+        "environment_applicable", "environment_id", "hardware_profile_generation",
+        "evidence_generation", "provenance_ids",
+    )
+    normalized = {key: values.get(key) for key in keys}
+    normalized["precision_mode"] = (
+        normalized["precision_mode"].value
+        if isinstance(normalized.get("precision_mode"), HardwarePrecision)
+        else normalized.get("precision_mode")
+    )
+    normalized["provenance_ids"] = list(
+        _canonical_strings(tuple(normalized.get("provenance_ids") or ()), "provenance_ids")
+    )
+    return _stable_hash(normalized)
 
 
 def make_profile_identity(*, hardware_id: str, profile_generation: int) -> str:

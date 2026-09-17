@@ -4,13 +4,13 @@ from mercury.hardware_personality.contracts import HardwareEvidenceClass, Hardwa
 from mercury.hardware_personality.lifecycle import build_hardware_personality_profile, transition_hardware_trust
 from mercury.hardware_personality.normalization import normalize_hardware_descriptor
 from mercury.topology.contracts import (
-    LocalityDomain, TopologyCapabilityState, TopologyGraph, TopologyLink,
+    LocalityDomain, PathResult, TopologyCapabilityState, TopologyGraph, TopologyLink,
     TopologyLinkKind, TopologyNode, make_topology_graph_id, make_topology_link_id,
 )
 from mercury.topology.graph import build_topology_graph
 from mercury.topology.integration import node_from_hardware_profile
 from mercury.topology.locality import classify_locality
-from mercury.topology.paths import find_path, path_capability, path_metrics
+from mercury.topology.paths import build_path_result, find_path, path_capability, path_metrics, validate_current_path_result
 
 
 def _rejects(action):
@@ -152,6 +152,22 @@ def no_scheduler():
     return _rejects(lambda: TopologyGraph.model_validate(payload)), "extra scheduler authority is rejected"
 
 
+def path_result_contract():
+    graph = _g((_n(1), _n(2)), (_l("n1", "n2", measured_bw=50, measured_lat=2, evidence=("m",)),))
+    result = build_path_result(graph, "n1", "n2", provenance_ids=("cert",))
+    forged = result.model_dump() | {"fingerprint": "forged"}
+    return result == build_path_result(graph, "n1", "n2", provenance_ids=("cert",)) and _rejects(lambda: PathResult.model_validate(forged)), "path artifact is deterministic, immutable, and content-addressed"
+
+
+def path_refresh():
+    nodes, links = (_n(1), _n(2)), (_l("n1", "n2", measured_bw=50, measured_lat=2, evidence=("m",)),)
+    first = _g(nodes, links, generation=1)
+    stale = build_path_result(first, "n1", "n2")
+    refreshed_graph = _g(nodes, links, generation=2)
+    refreshed = build_path_result(refreshed_graph, "n1", "n2")
+    return _rejects(lambda: validate_current_path_result(stale, refreshed_graph)) and stale.path_result_id != refreshed.path_result_id, "graph refresh invalidates stale path artifacts"
+
+
 CHECKS = {name: globals()[name] for name in (
-    "exact_enums", "graph_identity", "node_link_integrity", "locality", "directed_paths", "asymmetric_links", "disconnected_graphs", "cyclic_graphs", "multihop_paths", "deterministic_path_selection", "metrics_unknown", "declared_measured_metrics", "path_provenance", "phase13_integration", "graph_generation", "permutation_invariance", "malformed_contract_rejection", "no_placement", "no_scheduler",
+    "exact_enums", "graph_identity", "node_link_integrity", "locality", "directed_paths", "asymmetric_links", "disconnected_graphs", "cyclic_graphs", "multihop_paths", "deterministic_path_selection", "metrics_unknown", "declared_measured_metrics", "path_provenance", "path_result_contract", "path_refresh", "phase13_integration", "graph_generation", "permutation_invariance", "malformed_contract_rejection", "no_placement", "no_scheduler",
 )}

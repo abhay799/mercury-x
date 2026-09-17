@@ -21,6 +21,8 @@ def test_phase15_certification_runs_each_required_behavioral_gate():
         {"schema_version": "mercury.phase15-certification/v1", "required_gates": list(REQUIRED_PHASE15_GATE_IDS[:-1])},
         {"schema_version": "mercury.phase15-certification/v1", "required_gates": [*REQUIRED_PHASE15_GATE_IDS, "unknown"]},
         {"schema_version": "mercury.phase15-certification/v1", "required_gates": [*REQUIRED_PHASE15_GATE_IDS, REQUIRED_PHASE15_GATE_IDS[0]]},
+        {"schema_version": "mercury.phase15-certification/v1", "required_gates": [*REQUIRED_PHASE15_GATE_IDS[:-1], " "]},
+        {"schema_version": "mercury.phase15-certification/v1", "required_gates": list(REQUIRED_PHASE15_GATE_IDS), "extra": True},
     ),
 )
 def test_phase15_certification_fails_closed_for_malformed_missing_duplicate_or_unknown_manifest(tmp_path, manifest):
@@ -33,3 +35,11 @@ def test_phase15_certification_fails_closed_for_malformed_missing_duplicate_or_u
 def test_phase15_certification_fails_closed_for_missing_manifest(tmp_path):
     with pytest.raises(ValueError, match="phase15 manifest unavailable"):
         evaluate(config_path=tmp_path / "missing.json")
+
+
+def test_phase15_certification_fails_closed_for_malformed_manifest_and_registry_mismatch(monkeypatch, tmp_path):
+    import mercury.certification.phase15 as phase15
+    malformed = tmp_path / "bad.json"; malformed.write_text("{", encoding="utf-8")
+    with pytest.raises(ValueError): phase15.evaluate(malformed)
+    monkeypatch.setitem(phase15.CHECKS, "unexpected", lambda: (True, "unexpected"))
+    with pytest.raises(ValueError): phase15.evaluate()

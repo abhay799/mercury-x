@@ -1,4 +1,5 @@
 import pytest
+from concurrent.futures import ThreadPoolExecutor
 
 from mercury.disaggregated_execution.contracts import (
     ExecutionSegment,
@@ -13,9 +14,13 @@ from mercury.speculation.contracts import (
     SpeculationPlan,
     SpeculativeBranch,
     SpeculativeBranchState,
+    SpeculativeBranchEventType,
+    SpeculationRetryMetadata,
 )
+from mercury.speculation.events import make_branch_event, apply_branch_event
 from mercury.speculation.planner import build_speculation_plan
 from mercury.speculation.state import transition_branch
+from mercury.speculation.ledger import LogicalCommitLedger
 
 
 def _plan() -> SpeculationPlan:
@@ -221,6 +226,8 @@ def test_typed_commit_rejects_stale_branch_generation_and_preserves_verified_pro
     assert result.source_execution_plan_id == plan.source_execution_plan_id
     assert result.verification_evidence_id == branch.verification_evidence_id
     assert result.winning_result_fingerprint == branch.result_fingerprint
+    assert result.branch_count == 1
+    assert result.verified_success_count == 1
 
     with pytest.raises(ValueError, match="stale"):
         commit_verified_winner(
@@ -239,3 +246,57 @@ def test_logical_commit_is_exactly_once_idempotent_for_the_same_verified_branch_
     second = commit_verified_winner(plan, (winner, failed))
     assert second == first
     assert second.result_fingerprint == first.result_fingerprint
+
+
+def test_logical_commit_ledger_is_race_safe_and_rejects_competing_winners() -> None:
+    plan = _plan()
+    first = _successful("branch-1", "candidate-1", "result-1")
+    second = _successful("branch-2", "candidate-2", "result-2")
+    ledger = LogicalCommitLedger()
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        results = tuple(executor.map(lambda _: ledger.commit(plan, (first, second)), range(8)))
+    assert len({result.result_fingerprint for result in results}) == 1
+    assert ledger.result_for(plan.speculation_plan_id) == results[0]
+
+    competing_first = first.model_copy(update={"verified": False, "verification_evidence_id": None})
+    with pytest.raises(ValueError, match="different authoritative commit"):
+        ledger.commit(plan, (competing_first, second))
+
+
+def test_branch_events_are_content_addressed_ordered_and_reject_stale_or_foreign_replay():
+    plan = _plan()
+    branch = SpeculativeBranch(
+        branch_id="branch-1", placement_candidate_id="candidate-1",
+        state=SpeculativeBranchState.PLANNED, speculation_plan_id=plan.speculation_plan_id,
+        source_segment_id=plan.source_segment_id, plan_fingerprint=plan.fingerprint,
+        candidate_fingerprint=dict(plan.candidate_fingerprints)["candidate-1"], generation=1,
+    )
+    event = make_branch_event(
+        branch=branch, target_state=SpeculativeBranchState.READY,
+        event_sequence=1, provenance_ids=("controller",),
+    )
+    transitioned = apply_branch_event(branch, event)
+    assert transitioned.state is SpeculativeBranchState.READY
+    assert event.event_type is SpeculativeBranchEventType.READY
+    with pytest.raises(ValueError, match="stale"):
+        apply_branch_event(transitioned, event)
+    with pytest.raises(ValueError, match="branch"):
+        apply_branch_event(branch.model_copy(update={"branch_id": "foreign"}), event)
+
+
+def test_retry_is_explicitly_unsupported_and_accounting_is_complete():
+    assert SpeculationRetryMetadata().retry_supported is False
+    with pytest.raises(ValueError, match="retry"):
+        SpeculationRetryMetadata(retry_supported=True, retry_attempt=1, maximum_attempts=1)
+    plan = _plan()
+    result = commit_verified_winner(
+        plan,
+        (_successful("branch-1", "candidate-1", "result-1"),
+         SpeculativeBranch(branch_id="branch-2", placement_candidate_id="candidate-2",
+                           state=SpeculativeBranchState.FAILED)),
+    )
+    assert result.accounting.total_planned_branches == 2
+    assert result.accounting.succeeded_branches == 1
+    assert result.accounting.failed_branches == 1
+    assert result.accounting.verification_count == 1
+    assert result.accounting.verification_overhead_units is None

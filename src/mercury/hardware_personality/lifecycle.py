@@ -58,12 +58,17 @@ def build_hardware_personality_profile(
     evidence = tuple(sorted(evidence, key=lambda item: item.evidence_id))
     if any(item.hardware_id != descriptor.hardware_id for item in evidence):
         raise ValueError("evidence hardware mismatch")
-    evidence_ids = {item.evidence_id for item in evidence}
+    evidence_by_id = {item.evidence_id: item for item in evidence}
+    evidence_ids = set(evidence_by_id)
     for item in evidence:
-        if item.evidence_class is HardwareEvidenceClass.DERIVED and not set(
-            item.derived_from_evidence_ids
-        ).issubset(evidence_ids):
-            raise ValueError("derived evidence source missing from profile evidence")
+        if item.evidence_class is HardwareEvidenceClass.DERIVED:
+            if not set(item.derived_from_evidence_ids).issubset(evidence_ids):
+                raise ValueError("derived evidence source missing from profile evidence")
+            sources = tuple(evidence_by_id[source_id] for source_id in item.derived_from_evidence_ids)
+            if any(not source.verification_status for source in sources):
+                raise ValueError("DERIVED evidence requires verified source evidence")
+            if any(source.generation != item.generation for source in sources):
+                raise ValueError("DERIVED evidence source generation is stale")
     if trust_state is HardwareTrustState.VERIFIED and not any(
         item.verification_status for item in evidence
     ):
