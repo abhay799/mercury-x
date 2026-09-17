@@ -12,15 +12,29 @@ def test_phase13_executable_certification_passes():
     assert all(passed for _, passed, _ in results)
 
 
-def test_manifest_rejects_duplicate_unknown_and_missing(monkeypatch, tmp_path):
-    original = list(phase13.load_manifest())
-    config_root = tmp_path / "configs" / "certification"
-    config_root.mkdir(parents=True)
-    path = config_root / "phase13.json"
+@pytest.mark.parametrize("mutation", ["missing", "unknown", "duplicate", "blank", "extra", "schema"])
+def test_manifest_rejects_duplicate_unknown_missing_blank_extra_and_schema(tmp_path, mutation):
+    gates = list(phase13.REQUIRED_PHASE13_GATE_IDS)
+    payload = {"schema_version": phase13.PHASE13_CERTIFICATION_SCHEMA, "required_gates": gates}
+    if mutation == "missing": payload["required_gates"] = gates[:-1]
+    elif mutation == "unknown": payload["required_gates"][-1] = "unknown"
+    elif mutation == "duplicate": payload["required_gates"][-1] = gates[0]
+    elif mutation == "blank": payload["required_gates"][-1] = " "
+    elif mutation == "extra": payload["extra"] = True
+    elif mutation == "schema": payload["schema_version"] = "unsupported"
+    path = tmp_path / "phase13.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError):
+        phase13.load_manifest(path)
 
-    # Validate evaluator logic directly through temporary CHECKS/manifest loader behavior.
-    assert len(original) == len(set(original))
-    assert set(original) == set(phase13.CHECKS)
+
+def test_phase13_manifest_missing_malformed_and_registry_mismatch_fail_closed(monkeypatch, tmp_path):
+    with pytest.raises(ValueError): phase13.load_manifest(tmp_path / "missing.json")
+    malformed = tmp_path / "bad.json"; malformed.write_text("{", encoding="utf-8")
+    with pytest.raises(ValueError): phase13.load_manifest(malformed)
+    monkeypatch.setitem(phase13.CHECKS, "unexpected", lambda: (True, "bad"))
+    with pytest.raises(ValueError):
+        phase13.load_manifest()
 
 
 def test_blank_runtime_evidence_fails_closed(monkeypatch):
