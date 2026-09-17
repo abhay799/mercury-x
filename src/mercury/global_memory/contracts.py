@@ -29,10 +29,40 @@ class GlobalPromotionRequest(ContractModel):
  def promotion_text(cls,v): return _text(v)
 class GlobalPromotionResult(ContractModel): status:GlobalMemoryPhaseStatus;record:GlobalContextRecord|None=None;reason:str|None=None
 class GlobalMemoryQuery(ContractModel):
- namespace_type:GlobalMemoryNamespace;namespace_id:str;authorized_namespace_type:GlobalMemoryNamespace;authorized_namespace_id:str;limit:int=Field(default=128,ge=1,le=128)
+ namespace_type:GlobalMemoryNamespace;namespace_id:str;authorized_namespace_type:GlobalMemoryNamespace;authorized_namespace_id:str;memory_types:tuple[GlobalMemoryType,...]|None=None;context_key:str|None=None;source_artifact_id:str|None=None;source_phase8_record_ids:tuple[str,...]|None=None;record_version:int|None=None;lifecycle:GlobalMemoryLifecycle|None=None;conflict_state:GlobalMemoryConflictState|None=None;current_only:bool=True;limit:int=Field(default=128,ge=1,le=128)
  @field_validator("namespace_id","authorized_namespace_id")
  @classmethod
  def query_text(cls,v): return _text(v)
+ @field_validator("context_key","source_artifact_id")
+ @classmethod
+ def optional_query_text(cls,v): return None if v is None else _text(v)
+ @field_validator("memory_types",mode="before")
+ @classmethod
+ def canonical_memory_types(cls,v):
+  if v is None:return None
+  if isinstance(v,(str,bytes,dict)):raise ValueError("memory types must be a collection")
+  try:return tuple(sorted({GlobalMemoryType(item) for item in v},key=lambda item:item.value))
+  except (TypeError,ValueError):raise ValueError("valid memory types required")
+ @field_validator("source_phase8_record_ids",mode="before")
+ @classmethod
+ def canonical_source_record_ids(cls,v):
+  if v is None:return None
+  if isinstance(v,(str,bytes,dict)):raise ValueError("source record ids must be a collection")
+  try:values=tuple(v)
+  except TypeError:raise ValueError("source record ids must be a collection")
+  if any(not isinstance(item,str) or not item.strip() for item in values):raise ValueError("nonblank source record ids required")
+  if len(values)!=len(set(values)):raise ValueError("duplicate source record ids")
+  return tuple(sorted(values))
+ @field_validator("record_version")
+ @classmethod
+ def query_record_version(cls,v):
+  if v is not None and (not isinstance(v,int) or isinstance(v,bool) or v<=0):raise ValueError("positive record version required")
+  return v
+ @field_validator("current_only")
+ @classmethod
+ def query_current_only(cls,v):
+  if not isinstance(v,bool):raise ValueError("boolean current_only required")
+  return v
 class GlobalMemoryRetrievalResult(ContractModel): status:GlobalMemoryPhaseStatus;records:tuple[GlobalContextRecord,...]
 class GlobalConsolidationRequest(ContractModel): namespace_type:GlobalMemoryNamespace;namespace_id:str;source_record_ids:tuple[str,...];method_id:str;method_version:str;context_key:str;memory_type:GlobalMemoryType
 class GlobalConsolidationResult(ContractModel): status:GlobalMemoryPhaseStatus;record:GlobalContextRecord|None=None

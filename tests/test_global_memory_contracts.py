@@ -15,3 +15,17 @@ def test_promotion_request_represents_authorized_namespace_separately():
 def test_query_represents_authorization_separately():
  query=GlobalMemoryQuery(namespace_type=GlobalMemoryNamespace.PROJECT,namespace_id="target",authorized_namespace_type=GlobalMemoryNamespace.PROJECT,authorized_namespace_id="caller")
  assert query.authorized_namespace_id=="caller" and query.limit==128
+
+def test_query_supports_deterministic_structured_retrieval_filters():
+ first=GlobalMemoryQuery(namespace_type=GlobalMemoryNamespace.PROJECT,namespace_id="target",authorized_namespace_type=GlobalMemoryNamespace.PROJECT,authorized_namespace_id="caller",memory_types=(GlobalMemoryType.GLOBAL_SUMMARY,GlobalMemoryType.VALIDATED_FACT),context_key="context",source_artifact_id="artifact",source_phase8_record_ids=("phase8-b","phase8-a"),record_version=2,lifecycle=GlobalMemoryLifecycle.SUPERSEDED,conflict_state=GlobalMemoryConflictState.CONFLICTING,current_only=False)
+ second=GlobalMemoryQuery(namespace_type=GlobalMemoryNamespace.PROJECT,namespace_id="target",authorized_namespace_type=GlobalMemoryNamespace.PROJECT,authorized_namespace_id="caller",memory_types=(GlobalMemoryType.VALIDATED_FACT,GlobalMemoryType.GLOBAL_SUMMARY),context_key="context",source_artifact_id="artifact",source_phase8_record_ids=("phase8-a","phase8-b"),record_version=2,lifecycle=GlobalMemoryLifecycle.SUPERSEDED,conflict_state=GlobalMemoryConflictState.CONFLICTING,current_only=False)
+ assert first==second
+ assert first.memory_types==(GlobalMemoryType.GLOBAL_SUMMARY,GlobalMemoryType.VALIDATED_FACT)
+ assert first.source_phase8_record_ids==("phase8-a","phase8-b")
+
+def test_query_rejects_malformed_structured_retrieval_filters():
+ common=dict(namespace_type=GlobalMemoryNamespace.PROJECT,namespace_id="target",authorized_namespace_type=GlobalMemoryNamespace.PROJECT,authorized_namespace_id="caller")
+ with pytest.raises(Exception): GlobalMemoryQuery(**common,context_key="")
+ with pytest.raises(Exception): GlobalMemoryQuery(**common,source_artifact_id="")
+ with pytest.raises(Exception): GlobalMemoryQuery(**common,source_phase8_record_ids=("phase8","phase8"))
+ with pytest.raises(Exception): GlobalMemoryQuery(**common,record_version=0)
