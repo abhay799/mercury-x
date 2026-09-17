@@ -9,3 +9,6 @@ def test_locked_vocabularies_limits_and_determinism():
  assert global_context_record_id(record())==global_context_record_id(record())
  with pytest.raises(Exception): GlobalMemoryNamespace("GLOBAL")
  with pytest.raises(Exception): record(namespace_id="")
+def test_promotion_request_represents_authorized_namespace_separately():
+ request=GlobalPromotionRequest(namespace_type=GlobalMemoryNamespace.PROJECT,namespace_id="target",authorized_namespace_type=GlobalMemoryNamespace.PROJECT,authorized_namespace_id="caller",source_phase8_record_ids=("r",),promotion_policy_id="p",retention_policy_id="r",memory_type=GlobalMemoryType.PROJECT_CONTEXT,context_key="k",source_session_id="s",promotable=True)
+ assert request.authorized_namespace_id=="caller"

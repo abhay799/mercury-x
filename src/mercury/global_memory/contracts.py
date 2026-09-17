@@ -22,7 +22,11 @@ class GlobalContextRecord(ContractModel):
  def positive(cls,v):
   if not isinstance(v,int) or v<=0: raise ValueError("positive required")
   return v
-class GlobalPromotionRequest(ContractModel): namespace_type:GlobalMemoryNamespace;namespace_id:str;source_phase8_record_ids:tuple[str,...];promotion_policy_id:str;retention_policy_id:str;memory_type:GlobalMemoryType;context_key:str;source_session_id:str;promotable:bool
+class GlobalPromotionRequest(ContractModel):
+ namespace_type:GlobalMemoryNamespace;namespace_id:str;authorized_namespace_type:GlobalMemoryNamespace;authorized_namespace_id:str;source_phase8_record_ids:tuple[str,...];promotion_policy_id:str;retention_policy_id:str;memory_type:GlobalMemoryType;context_key:str;source_session_id:str;promotable:bool
+ @field_validator("namespace_id","authorized_namespace_id","promotion_policy_id","retention_policy_id","context_key","source_session_id")
+ @classmethod
+ def promotion_text(cls,v): return _text(v)
 class GlobalPromotionResult(ContractModel): status:GlobalMemoryPhaseStatus;record:GlobalContextRecord|None=None;reason:str|None=None
 class GlobalMemoryQuery(ContractModel): namespace_type:GlobalMemoryNamespace;namespace_id:str;limit:int=Field(default=128,ge=1,le=128)
 class GlobalMemoryRetrievalResult(ContractModel): status:GlobalMemoryPhaseStatus;records:tuple[GlobalContextRecord,...]
