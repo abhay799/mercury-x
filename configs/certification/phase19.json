@@ -1,0 +1,11 @@
+{
+  "required_gates": [
+    "metric_registry",
+    "constraint_typing",
+    "policy_hierarchy",
+    "temporal_semantics",
+    "error_budget",
+    "versioning",
+    "no_silent_weakening"
+  ]
+}

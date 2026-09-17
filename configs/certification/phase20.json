@@ -1,0 +1,15 @@
+{
+  "required_gates": [
+    "no_quality_reduction",
+    "feasibility",
+    "constraint_propagation",
+    "pareto_offers",
+    "multi_round",
+    "lease",
+    "approval",
+    "atomic_commit",
+    "concurrency",
+    "revocation",
+    "unknown_fail_closed"
+  ]
+}

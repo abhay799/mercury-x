@@ -1,0 +1,10 @@
+{
+  "required_gates": [
+    "contracts",
+    "quality_floor",
+    "frontier",
+    "escalation",
+    "uncalibrated",
+    "no_cross_phase_authority"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "required_gates": [
+    "admission",
+    "fairness",
+    "preemption",
+    "gang",
+    "speculation_accounting",
+    "no_quality_degrade",
+    "no_runtime_side_effects"
+  ]
+}
