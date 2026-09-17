@@ -1,256 +1,127 @@
+"""Typed, exact-scope adapters for already-authorized Phase 8/9 sources."""
 from collections import defaultdict
 from collections.abc import Iterable
-from typing import Any
 
 from mercury.context_prediction.contracts import (
-    MAX_PREDICTION_CANDIDATES,
-    MAX_SOURCE_RECORDS_PER_PREDICTION,
-    ContextPredictionCandidate,
-    ContextPredictionRequest,
-    make_context_prediction_candidate_id,
+    MAX_PREDICTION_CANDIDATES, MAX_SOURCE_RECORDS_PER_PREDICTION,
+    ContextPredictionCandidate, ContextPredictionRequest, ContextPredictionSourceEvidence,
+    SessionPredictionScope, make_context_prediction_candidate_id,
 )
-from mercury.global_memory.contracts import GlobalMemoryConflictState
+from mercury.global_memory.contracts import GlobalContextRecord, GlobalMemoryLifecycle, GlobalMemoryConflictState
+from mercury.global_memory.store import GlobalContextStore
+from mercury.session_memory.contracts import SessionMemoryRecord, SessionMemoryLifecycle
 
 
-def _value(obj: Any, *names: str, default=None):
-    if isinstance(obj, dict):
-        for name in names:
-            if name in obj:
-                return obj[name]
-        return default
-    for name in names:
-        if hasattr(obj, name):
-            return getattr(obj, name)
-    if hasattr(obj, "model_dump"):
-        data = obj.model_dump()
-        for name in names:
-            if name in data:
-                return data[name]
-    return default
+def _record(record, expected_type):
+    if type(record) is not expected_type:
+        raise ValueError(f"exact {expected_type.__name__} source required")
+    # Copies and model_construct bypass frozen-model validation.
+    data = record.model_dump()
+    for name, field in expected_type.model_fields.items():
+        if field.is_required() and name not in record.model_fields_set:
+            raise ValueError(f"missing explicit source {name}")
+    return expected_type.model_validate(data)
 
 
-def _enum_value(value):
-    return getattr(value, "value", value)
-
-
-def _text(value, *, field_name: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{field_name} must be nonblank")
-    return value
-
-
-def _text_tuple(value) -> tuple[str, ...]:
-    if value is None:
-        return ()
-    if isinstance(value, str):
-        value = (value,)
-    result = tuple(str(item) for item in value)
-    if any(not item.strip() for item in result):
-        raise ValueError("source identity must be nonblank")
-    return tuple(sorted(set(result)))
-
-
-def _record_id(record: Any, *, global_record: bool) -> str:
-    names = (
-        ("global_record_id", "record_id", "memory_record_id", "memory_id", "id")
-        if global_record
-        else (
-            "session_memory_record_id",
-            "session_record_id",
-            "record_id",
-            "memory_record_id",
-            "memory_id",
-            "id",
-        )
+def _session_source(record: SessionMemoryRecord, scope: SessionPredictionScope):
+    record = _record(record, SessionMemoryRecord)
+    if record.schema_version != "mercury.session-memory/v1":
+        raise ValueError("unsupported session source schema")
+    if record.session_id != scope.session_id:
+        raise ValueError("session scope mismatch")
+    if not isinstance(record.retrieval_key, str) or not record.retrieval_key.strip():
+        raise ValueError("explicit session retrieval_key required")
+    evidence = ContextPredictionSourceEvidence(
+        source_kind="SESSION", record_id=record.record_id, record_version=record.record_version,
+        sequence_scope=record.session_id, creation_sequence=record.creation_sequence,
+        source_artifact_ids=(record.source_artifact_id,), provenance=record.provenance,
     )
-    return _text(_value(record, *names), field_name="source record id")
+    return record, record.retrieval_key, evidence, record.lifecycle is SessionMemoryLifecycle.ACTIVE
 
 
-def _context_key(record: Any) -> str:
-    return _text(
-        _value(record, "context_key", "memory_key", "key"),
-        field_name="context_key",
-    )
-
-
-def _artifact_ids(record: Any) -> tuple[str, ...]:
-    values = _value(
-        record,
-        "source_artifact_ids",
-        "artifact_ids",
-        default=None,
-    )
-    if values is None:
-        single = _value(record, "source_artifact_id", "artifact_id", default=None)
-        values = () if single is None else (single,)
-    return _text_tuple(values)
-
-
-def _phase8_ids_from_global(record: Any) -> tuple[str, ...]:
-    values = _value(
-        record,
-        "source_phase8_record_ids",
-        "source_session_memory_record_ids",
-        default=None,
-    )
-    if values is None:
-        single = _value(
-            record,
-            "source_phase8_record_id",
-            "source_session_memory_record_id",
-            default=None,
-        )
-        values = () if single is None else (single,)
-    return _text_tuple(values)
-
-
-def _validate_optional_namespace(record: Any, request: ContextPredictionRequest) -> None:
-    namespace_type = _value(record, "namespace_type", default=None)
-    namespace_id = _value(record, "namespace_id", default=None)
-
-    if namespace_type is None and namespace_id is None:
-        return
-    if namespace_type is None or namespace_id is None:
-        raise ValueError("partial namespace identity is forbidden")
-    if (
-        _enum_value(namespace_type) != request.namespace_type.value
-        or namespace_id != request.namespace_id
-    ):
+def _global_source(record: GlobalContextRecord, request: ContextPredictionRequest):
+    record = _record(record, GlobalContextRecord)
+    if (record.namespace_type, record.namespace_id) != (request.namespace_type, request.namespace_id):
         raise ValueError("cross-namespace source forbidden")
-
-
-def _is_active(record: Any) -> bool:
-    lifecycle = _value(record, "lifecycle", default="ACTIVE")
-    return _enum_value(lifecycle) == "ACTIVE"
-
-
-def _has_conflict(record: Any) -> bool:
-    value = _value(record, "conflict_state", default=None)
-    if value is None:
-        return bool(_value(record, "conflict_present", default=False))
-    return _enum_value(value) == GlobalMemoryConflictState.CONFLICTING.value
-
-
-def _global_records(store: Any) -> tuple[Any, ...]:
-    if store is None:
-        return ()
-    records = _value(store, "records", default=())
-    return tuple(records)
-
-
-def _namespace_closed(store: Any, request: ContextPredictionRequest) -> bool:
-    if store is None:
-        return False
-    method = getattr(store, "is_namespace_closed", None)
-    if method is None:
-        return False
-    return bool(method(request.namespace_type, request.namespace_id))
+    evidence = ContextPredictionSourceEvidence(
+        source_kind="GLOBAL", record_id=record.global_record_id, record_version=record.record_version,
+        sequence_scope=record.namespace_id, creation_sequence=record.creation_sequence,
+        source_artifact_ids=record.source_artifact_ids, source_phase8_record_ids=record.source_phase8_record_ids,
+        provenance=record.provenance, conflict_state=record.conflict_state,
+    )
+    return record, record.context_key, evidence, record.lifecycle is GlobalMemoryLifecycle.ACTIVE
 
 
 def build_prediction_candidates(
     request: ContextPredictionRequest,
     *,
-    session_records: Iterable[Any] = (),
-    global_store: Any | None = None,
+    session_records: Iterable[SessionMemoryRecord] = (),
+    global_store: GlobalContextStore | None = None,
+    session_scope: SessionPredictionScope | None = None,
     dependency_context_keys: Iterable[str] = (),
 ) -> tuple[ContextPredictionCandidate, ...]:
-    if not isinstance(request, ContextPredictionRequest):
+    if type(request) is not ContextPredictionRequest:
         raise ValueError("context prediction request required")
-
-    if _namespace_closed(global_store, request):
-        raise ValueError("closed namespace cannot produce predictions")
-
-    dependency_keys = tuple(sorted(set(str(x) for x in dependency_context_keys)))
-    if any(not key.strip() for key in dependency_keys):
+    request = ContextPredictionRequest.model_validate(request.model_dump())
+    if any(not isinstance(key, str) or not key.strip() for key in dependency_context_keys):
         raise ValueError("dependency context key must be nonblank")
+    if session_scope is not None:
+        if type(session_scope) is not SessionPredictionScope:
+            raise ValueError("explicit session scope required")
+        session_scope = SessionPredictionScope.model_validate(session_scope.model_dump())
+        if (session_scope.namespace_type, session_scope.namespace_id) != (request.namespace_type, request.namespace_id):
+            raise ValueError("session namespace scope mismatch")
+    sessions = tuple(session_records)
+    if sessions and session_scope is None:
+        raise ValueError("explicit session scope required")
+    globals_ = ()
+    if global_store is not None:
+        if type(global_store) is not GlobalContextStore:
+            raise ValueError("certified GlobalContextStore required")
+        checked_store = GlobalContextStore.model_validate(global_store.model_dump())
+        for closure in checked_store.closed_namespaces:
+            if not closure.namespace_id.strip() or not closure.closure_reason.strip() or closure.closed is not True or closure.closure_sequence < 1:
+                raise ValueError("malformed namespace closure")
+        if checked_store.is_namespace_closed(request.namespace_type, request.namespace_id):
+            raise ValueError("closed namespace cannot produce predictions")
+        globals_ = global_store.records
 
-    grouped: dict[str, dict[str, Any]] = defaultdict(
-        lambda: {
-            "global_ids": set(),
-            "phase8_ids": set(),
-            "artifact_ids": set(),
-            "conflict": False,
-            "sequences": [],
-        }
-    )
-
-    for record in tuple(session_records):
-        _validate_optional_namespace(record, request)
-        if not _is_active(record):
-            continue
-        key = _context_key(record)
-        rid = _record_id(record, global_record=False)
-        entry = grouped[key]
-        entry["phase8_ids"].add(rid)
-        entry["artifact_ids"].update(_artifact_ids(record))
-        sequence = _value(record, "creation_sequence", "sequence", default=1)
-        if not isinstance(sequence, int) or isinstance(sequence, bool) or sequence < 1:
-            raise ValueError("invalid creation sequence")
-        entry["sequences"].append(sequence)
-
-    for record in _global_records(global_store):
-        _validate_optional_namespace(record, request)
-        if not _is_active(record):
-            continue
-        key = _context_key(record)
-        rid = _record_id(record, global_record=True)
-        entry = grouped[key]
-        entry["global_ids"].add(rid)
-        entry["phase8_ids"].update(_phase8_ids_from_global(record))
-        entry["artifact_ids"].update(_artifact_ids(record))
-        entry["conflict"] = entry["conflict"] or _has_conflict(record)
-        sequence = _value(record, "creation_sequence", "sequence", default=1)
-        if not isinstance(sequence, int) or isinstance(sequence, bool) or sequence < 1:
-            raise ValueError("invalid creation sequence")
-        entry["sequences"].append(sequence)
+    grouped = defaultdict(list)
+    identities = {}
+    for records, adapter in (
+        (sessions, lambda source: _session_source(source, session_scope)),
+        (globals_, lambda source: _global_source(source, request)),
+    ):
+        for source in records:
+            record, key, evidence, active = adapter(source)
+            identity = (evidence.source_kind, evidence.record_id)
+            canonical = record.model_dump()
+            for field in ("provenance", "source_phase8_record_ids", "source_artifact_ids"):
+                if field in canonical:
+                    canonical[field] = tuple(sorted(set(canonical[field])))
+            if identity in identities:
+                if identities[identity] != canonical:
+                    raise ValueError("conflicting duplicate source identity")
+                continue
+            identities[identity] = canonical
+            if active:
+                grouped[key].append(evidence)
+                if len(grouped) > MAX_PREDICTION_CANDIDATES:
+                    raise ValueError("too many prediction candidates")
 
     candidates = []
-    for key in sorted(grouped):
-        entry = grouped[key]
-        global_ids = tuple(sorted(entry["global_ids"]))
-        phase8_ids = tuple(sorted(entry["phase8_ids"]))
-        artifact_ids = tuple(sorted(entry["artifact_ids"]))
-        source_count = len(global_ids) + len(phase8_ids)
-        if source_count == 0:
-            raise ValueError("candidate must have source lineage")
-        if source_count > MAX_SOURCE_RECORDS_PER_PREDICTION:
+    for key, sources in sorted(grouped.items()):
+        global_ids = tuple(sorted(item.record_id for item in sources if item.source_kind == "GLOBAL"))
+        phase8_ids = {item.record_id for item in sources if item.source_kind == "SESSION"}
+        phase8_ids.update(rid for item in sources for rid in item.source_phase8_record_ids)
+        phase8_ids = tuple(sorted(phase8_ids))
+        if len(global_ids) + len(phase8_ids) > MAX_SOURCE_RECORDS_PER_PREDICTION:
             raise ValueError("too many source records for prediction candidate")
-        creation_sequence = max(entry["sequences"]) if entry["sequences"] else 1
-        candidate_id = make_context_prediction_candidate_id(
-            namespace_type=request.namespace_type,
-            namespace_id=request.namespace_id,
-            context_key=key,
-            source_global_record_ids=global_ids,
-            source_phase8_record_ids=phase8_ids,
-            source_artifact_ids=artifact_ids,
-            conflict_present=bool(entry["conflict"]),
-            creation_sequence=creation_sequence,
-        )
-        candidates.append(
-            ContextPredictionCandidate(
-                namespace_type=request.namespace_type,
-                namespace_id=request.namespace_id,
-                context_key=key,
-                candidate_id=candidate_id,
-                source_global_record_ids=global_ids,
-                source_phase8_record_ids=phase8_ids,
-                source_artifact_ids=artifact_ids,
-                conflict_present=bool(entry["conflict"]),
-                creation_sequence=creation_sequence,
-            )
-        )
-
-    if len(candidates) > MAX_PREDICTION_CANDIDATES:
-        raise ValueError("too many prediction candidates")
-
-    return tuple(
-        sorted(
-            candidates,
-            key=lambda item: (
-                item.namespace_type.value,
-                item.namespace_id,
-                item.context_key,
-                item.candidate_id,
-            ),
-        )
-    )
+        data = dict(namespace_type=request.namespace_type, namespace_id=request.namespace_id,
+                    context_key=key, source_global_record_ids=global_ids, source_phase8_record_ids=phase8_ids,
+                    source_artifact_ids=tuple(sorted({aid for item in sources for aid in item.source_artifact_ids})),
+                    conflict_present=any(item.conflict_state is GlobalMemoryConflictState.CONFLICTING for item in sources),
+                    creation_sequence=max(item.creation_sequence for item in sources))
+        candidates.append(ContextPredictionCandidate(
+            candidate_id=make_context_prediction_candidate_id(**data), source_evidence=tuple(sources), **data))
+    return tuple(candidates)

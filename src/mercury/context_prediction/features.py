@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 from mercury.context_prediction.contracts import (
     ContextPredictionCandidate,
@@ -31,9 +31,11 @@ def extract_prediction_features(
     dependency_context_keys: Iterable[str] = (),
     current_artifact_ids: Iterable[str] = (),
     current_phase8_record_ids: Iterable[str] = (),
+    reference_sequences: Mapping[tuple[str, str], int] | None = None,
 ) -> ContextPredictionFeatureVector:
     if not isinstance(candidate, ContextPredictionCandidate):
         raise ValueError("prediction candidate required")
+    candidate = ContextPredictionCandidate.model_validate(candidate.model_dump())
 
     if current_context_key is not None:
         if not isinstance(current_context_key, str) or not current_context_key.strip():
@@ -77,16 +79,37 @@ def extract_prediction_features(
     )
     session_global_agreement = (
         1.0
-        if candidate.source_phase8_record_ids
-        and candidate.source_global_record_ids
+        if {item.source_kind for item in candidate.source_evidence} == {"SESSION", "GLOBAL"}
+        and not candidate.conflict_present
         else 0.0
     )
     lifecycle_eligibility = 1.0
     conflict_state = 0.0 if candidate.conflict_present else 1.0
 
-    # Phase 10 deliberately avoids wall-clock inference. A neutral recency
-    # prior is used until a separately certified recency signal exists.
-    recency = 0.5
+    # Sequence domains are independent: never compare a session's counter to
+    # a global namespace counter. Missing reference means unavailable, not a prior.
+    recency = None
+    if reference_sequences is not None:
+        if not isinstance(reference_sequences, Mapping):
+            raise ValueError("sequence references must be a mapping")
+        for domain, sequence in reference_sequences.items():
+            if (not isinstance(domain, tuple) or len(domain) != 2 or
+                    domain[0] not in ("SESSION", "GLOBAL") or
+                    not isinstance(domain[1], str) or not domain[1].strip() or
+                    type(sequence) is not int or sequence < 1):
+                raise ValueError("invalid sequence reference")
+        ages = []
+        missing = False
+        for source in candidate.source_evidence:
+            reference = reference_sequences.get((source.source_kind, source.sequence_scope))
+            if reference is None:
+                missing = True
+                continue
+            if reference < source.creation_sequence:
+                raise ValueError("reference sequence precedes source")
+            ages.append(1.0 / (1 + reference - source.creation_sequence))
+        if ages and not missing:
+            recency = sum(ages) / len(ages)
 
     if task_continuity:
         horizon_compatibility = 1.0

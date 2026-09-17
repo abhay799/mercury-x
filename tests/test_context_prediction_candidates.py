@@ -1,73 +1,36 @@
-from dataclasses import dataclass
-
 import pytest
 
 from mercury.context_prediction.candidates import build_prediction_candidates
-from mercury.context_prediction.contracts import ContextPredictionRequest
 from mercury.global_memory.contracts import (
     GlobalMemoryConflictState,
+    GlobalMemoryLifecycle,
     GlobalMemoryNamespace,
+)
+from tests._context_prediction_helpers import (
+    global_record,
+    request,
+    scope,
+    session_record,
+    store,
 )
 
 
-@dataclass(frozen=True)
-class Record:
-    record_id: str
-    context_key: str
-    lifecycle: str = "ACTIVE"
-    namespace_type: object | None = None
-    namespace_id: str | None = None
-    creation_sequence: int = 1
-    source_artifact_ids: tuple[str, ...] = ()
-    source_phase8_record_ids: tuple[str, ...] = ()
-    conflict_state: object = GlobalMemoryConflictState.CLEAR
-
-
-class Store:
-    def __init__(self, records=(), closed=False):
-        self.records = tuple(records)
-        self.closed = closed
-
-    def is_namespace_closed(self, namespace_type, namespace_id):
-        return self.closed
-
-
-def request():
-    return ContextPredictionRequest(
-        namespace_type=GlobalMemoryNamespace.PROJECT,
-        namespace_id="p1",
-        authorized_namespace_type=GlobalMemoryNamespace.PROJECT,
-        authorized_namespace_id="p1",
-        predictor_id="phase10",
-        predictor_version="1",
-    )
-
-
 def test_builds_deterministic_merged_candidate():
-    session = Record(
-        "s1",
-        "risk",
-        namespace_type=GlobalMemoryNamespace.PROJECT,
-        namespace_id="p1",
-        source_artifact_ids=("a1",),
-    )
-    global_record = Record(
-        "g1",
-        "risk",
-        namespace_type=GlobalMemoryNamespace.PROJECT,
-        namespace_id="p1",
-        source_phase8_record_ids=("s1",),
+    session = session_record()
+    global_source = global_record(
         conflict_state=GlobalMemoryConflictState.CONFLICTING,
     )
     first = build_prediction_candidates(
         request(),
         session_records=(session,),
-        global_store=Store((global_record,)),
+        session_scope=scope(),
+        global_store=store(global_source),
     )
     second = build_prediction_candidates(
         request(),
         session_records=(session,),
-        global_store=Store((global_record,)),
+        session_scope=scope(),
+        global_store=store(global_source),
     )
     assert first == second
     assert len(first) == 1
@@ -77,48 +40,74 @@ def test_builds_deterministic_merged_candidate():
 
 
 def test_closed_namespace_fails_closed():
-    with pytest.raises(ValueError):
-        build_prediction_candidates(request(), global_store=Store(closed=True))
+    closed = store().close_namespace(
+        GlobalMemoryNamespace.PROJECT,
+        "p1",
+        closure_reason="project ended",
+        closure_sequence=1,
+    )
+    with pytest.raises(ValueError, match="closed namespace"):
+        build_prediction_candidates(request(), global_store=closed)
 
 
 def test_cross_namespace_source_fails_closed():
-    bad = Record(
-        "s1",
-        "risk",
-        namespace_type=GlobalMemoryNamespace.PROJECT,
-        namespace_id="other",
-    )
-    with pytest.raises(ValueError):
-        build_prediction_candidates(request(), session_records=(bad,))
+    bad = global_record(namespace_id="other")
+    with pytest.raises(ValueError, match="cross-namespace"):
+        build_prediction_candidates(request(), global_store=store(bad))
 
 
-def test_non_active_sources_are_excluded():
-    dead = Record(
-        "g1",
-        "risk",
-        lifecycle="REVOKED",
-        namespace_type=GlobalMemoryNamespace.PROJECT,
-        namespace_id="p1",
-    )
+@pytest.mark.parametrize(
+    "lifecycle",
+    (
+        GlobalMemoryLifecycle.REVOKED,
+        GlobalMemoryLifecycle.EXPIRED,
+        GlobalMemoryLifecycle.SUPERSEDED,
+        GlobalMemoryLifecycle.TOMBSTONED,
+    ),
+)
+def test_non_active_sources_are_excluded(lifecycle):
+    dead = global_record(lifecycle=lifecycle)
     assert build_prediction_candidates(
         request(),
-        global_store=Store((dead,)),
+        global_store=store(dead),
     ) == ()
 
 
 def test_permutation_does_not_change_candidate_result():
-    a = Record("s2", "risk")
-    b = Record("s1", "risk")
+    a = session_record("s2", "risk", creation_sequence=2)
+    b = session_record("s1", "risk")
     assert build_prediction_candidates(
         request(),
         session_records=(a, b),
+        session_scope=scope(),
     ) == build_prediction_candidates(
         request(),
         session_records=(b, a),
+        session_scope=scope(),
     )
 
 
 def test_candidate_cap_fails_closed():
-    records = tuple(Record(f"s{i}", f"k{i}") for i in range(257))
-    with pytest.raises(ValueError):
-        build_prediction_candidates(request(), session_records=records)
+    records = tuple(session_record(f"s{i}", f"k{i}") for i in range(257))
+    with pytest.raises(ValueError, match="too many prediction candidates"):
+        build_prediction_candidates(
+            request(), session_records=records, session_scope=scope()
+        )
+
+
+def test_same_session_cannot_use_another_namespace_scope():
+    with pytest.raises(ValueError, match="session namespace scope mismatch"):
+        build_prediction_candidates(
+            request(),
+            session_records=(session_record(),),
+            session_scope=scope(namespace_id="p2"),
+        )
+
+
+def test_another_session_cannot_use_authorized_namespace_scope():
+    with pytest.raises(ValueError, match="session scope mismatch"):
+        build_prediction_candidates(
+            request(),
+            session_records=(session_record(session_id="session-other"),),
+            session_scope=scope(),
+        )

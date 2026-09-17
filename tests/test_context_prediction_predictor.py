@@ -47,7 +47,7 @@ def candidate(key, sequence=1):
 def features(c, continuity=0.0, dependency=0.0):
     return ContextPredictionFeatureVector(
         candidate_id=c.candidate_id,
-        recency=0.5,
+        recency=None,
         task_continuity=continuity,
         context_key_recurrence=0.0,
         dependency_adjacency=dependency,

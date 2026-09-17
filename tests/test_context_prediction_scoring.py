@@ -10,7 +10,7 @@ from mercury.context_prediction.scoring import score_prediction
 def vector(**overrides):
     data = dict(
         candidate_id="c1",
-        recency=0.5,
+        recency=None,
         task_continuity=0.0,
         context_key_recurrence=0.0,
         dependency_adjacency=0.0,

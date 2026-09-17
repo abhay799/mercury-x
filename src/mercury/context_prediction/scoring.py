@@ -41,10 +41,14 @@ def score_prediction(
 ]:
     if not isinstance(features, ContextPredictionFeatureVector):
         raise ValueError("prediction feature vector required")
+    features = ContextPredictionFeatureVector.model_validate(features.model_dump())
 
     confidence = 0.0
     for name, weight in WEIGHTS.items():
-        confidence += float(getattr(features, name)) * weight
+        value = getattr(features, name)
+        # Unavailable evidence contributes zero; never renormalize remaining
+        # weights upward, which would reward missing temporal evidence.
+        confidence += (0.0 if value is None else value) * weight
     confidence = round(max(0.0, min(1.0, confidence)), 12)
 
     if not math.isfinite(confidence):

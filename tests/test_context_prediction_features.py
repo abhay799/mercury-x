@@ -58,7 +58,9 @@ def test_features_are_deterministic_and_explainable():
     assert a.dependency_adjacency == 1.0
     assert a.source_lineage_overlap == 1.0
     assert a.artifact_continuity == 1.0
-    assert a.session_global_agreement == 1.0
+    # Source lineage on a global candidate does not establish a contemporaneous
+    # session observation. Agreement requires explicit SESSION and GLOBAL evidence.
+    assert a.session_global_agreement == 0.0
 
 
 def test_conflict_is_represented_not_resolved():

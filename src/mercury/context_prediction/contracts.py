@@ -2,6 +2,7 @@ import hashlib
 import json
 import math
 from enum import Enum
+from typing import Literal
 
 from pydantic import (
     Field,
@@ -11,7 +12,7 @@ from pydantic import (
 
 from mercury.contracts.base import ContractModel
 from mercury.global_memory.contracts import (
-    GlobalMemoryNamespace,
+    GlobalMemoryNamespace, GlobalMemoryConflictState,
 )
 
 
@@ -19,6 +20,73 @@ MAX_PREDICTION_CANDIDATES = 256
 MAX_CONTEXT_PREDICTIONS = 64
 MAX_SOURCE_RECORDS_PER_PREDICTION = 128
 MAX_REASON_CODES = 16
+
+
+class SessionPredictionScope(ContractModel):
+    """Explicit caller binding of one authorized session to the request namespace."""
+    namespace_type: GlobalMemoryNamespace
+    namespace_id: str
+    session_id: str
+
+    @field_validator("namespace_id", "session_id")
+    @classmethod
+    def nonblank(cls, value):
+        return _require_nonblank(value, field_name="session scope")
+
+
+class ContextPredictionSourceEvidence(ContractModel):
+    source_kind: Literal["SESSION", "GLOBAL"]
+    record_id: str
+    record_version: int = Field(ge=1, strict=True)
+    sequence_scope: str
+    creation_sequence: int = Field(ge=1, strict=True)
+    source_artifact_ids: tuple[str, ...]
+    source_phase8_record_ids: tuple[str, ...] = ()
+    provenance: tuple[str, ...]
+    conflict_state: GlobalMemoryConflictState | None = None
+
+    @field_validator("record_id", "sequence_scope")
+    @classmethod
+    def text(cls, value):
+        return _require_nonblank(value, field_name="source evidence")
+
+    @field_validator("provenance", "source_artifact_ids", "source_phase8_record_ids")
+    @classmethod
+    def canonical(cls, value, info):
+        if not value and info.field_name != "source_phase8_record_ids":
+            raise ValueError("source evidence must be nonempty")
+        for item in value:
+            _require_nonblank(item, field_name=info.field_name)
+        return tuple(sorted(set(value)))
+
+    @model_validator(mode="after")
+    def source_state(self):
+        if self.source_kind == "GLOBAL" and (self.conflict_state is None or not self.source_phase8_record_ids):
+            raise ValueError("global source requires explicit conflict state and lineage")
+        if self.source_kind == "SESSION" and self.conflict_state is not None:
+            raise ValueError("session source has no global conflict state")
+        return self
+
+
+def canonical_source_evidence(values):
+    items = tuple(ContextPredictionSourceEvidence.model_validate(item.model_dump()) for item in values)
+    keys = tuple((item.source_kind, item.record_id) for item in items)
+    if len(keys) != len(set(keys)):
+        raise ValueError("duplicate source evidence")
+    if len(items) > MAX_SOURCE_RECORDS_PER_PREDICTION:
+        raise ValueError("too many source evidence records")
+    return tuple(sorted(items, key=lambda item: (item.source_kind, item.record_id)))
+
+
+def validate_evidence_links(value):
+    if not value.source_evidence:
+        return  # Legacy identity-only contracts remain readable; execution requires evidence.
+    globals_ = {item.record_id for item in value.source_evidence if item.source_kind == "GLOBAL"}
+    sessions = {item.record_id for item in value.source_evidence if item.source_kind == "SESSION"}
+    sessions.update(rid for item in value.source_evidence for rid in item.source_phase8_record_ids)
+    if globals_ != set(value.source_global_record_ids) or sessions != set(value.source_phase8_record_ids):
+        raise ValueError("source evidence does not match source identities")
+
 
 
 class ContextPredictionHorizon(str, Enum):
@@ -31,6 +99,11 @@ class ContextConfidenceBand(str, Enum):
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
+
+
+class ContextCalibrationStatus(str, Enum):
+    UNCALIBRATED = "UNCALIBRATED"
+    EMPIRICALLY_CALIBRATED = "EMPIRICALLY_CALIBRATED"
 
 
 class ContextPredictionReasonCode(str, Enum):
@@ -414,6 +487,12 @@ class ContextPredictionCandidate(
     namespace_id: str
     context_key: str
     candidate_id: str
+    source_evidence: tuple[ContextPredictionSourceEvidence, ...] = ()
+
+    @field_validator("source_evidence")
+    @classmethod
+    def evidence(cls, value):
+        return canonical_source_evidence(value)
 
     source_global_record_ids: tuple[
         str,
@@ -473,6 +552,7 @@ class ContextPredictionCandidate(
         mode="after"
     )
     def validate_candidate(self):
+        validate_evidence_links(self)
         source_count = (
             len(
                 self.source_global_record_ids
@@ -530,7 +610,8 @@ class ContextPredictionFeatureVector(
 ):
     candidate_id: str
 
-    recency: float = Field(
+    recency: float | None = Field(
+        default=None,
         ge=0.0,
         le=1.0,
     )
@@ -610,6 +691,8 @@ class ContextPredictionFeatureVector(
         cls,
         value,
     ):
+        if value is None:
+            return None
         numeric = float(
             value
         )
@@ -628,6 +711,22 @@ class ContextPrediction(
     ContractModel
 ):
     prediction_id: str
+    source_evidence: tuple[ContextPredictionSourceEvidence, ...] = ()
+    raw_score: float = Field(ge=0.0, le=1.0)
+    calibration_status: ContextCalibrationStatus = ContextCalibrationStatus.UNCALIBRATED
+    calibration_evidence: tuple[str, ...] = ()
+
+    @model_validator(mode="before")
+    @classmethod
+    def legacy_raw_score(cls, value):
+        if isinstance(value, dict) and "raw_score" not in value and "confidence" in value:
+            return dict(value, raw_score=value["confidence"])
+        return value
+
+    @field_validator("source_evidence")
+    @classmethod
+    def evidence(cls, value):
+        return canonical_source_evidence(value)
 
     namespace_type: GlobalMemoryNamespace
 
@@ -768,6 +867,17 @@ class ContextPrediction(
         mode="after"
     )
     def validate_prediction(self):
+        validate_evidence_links(self)
+        if self.calibration_status is ContextCalibrationStatus.UNCALIBRATED:
+            if self.raw_score != self.confidence or self.calibration_evidence:
+                raise ValueError("uncalibrated confidence must equal raw score without empirical claims")
+        elif not self.calibration_evidence:
+            raise ValueError("empirical calibration requires evidence")
+        _require_canonical_text_tuple(self.calibration_evidence, field_name="calibration evidence")
+        expected_band = (ContextConfidenceBand.LOW if self.confidence < 0.4 else
+                         ContextConfidenceBand.MEDIUM if self.confidence < 0.75 else ContextConfidenceBand.HIGH)
+        if self.confidence_band is not expected_band:
+            raise ValueError("confidence band inconsistent with score")
         source_count = (
             len(
                 self.source_global_record_ids
@@ -844,6 +954,7 @@ class ContextPredictionRequest(
 
     predictor_id: str
     predictor_version: str
+    prediction_horizon: ContextPredictionHorizon | None = None
 
     limit: int = Field(
         default=MAX_CONTEXT_PREDICTIONS,

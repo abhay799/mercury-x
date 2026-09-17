@@ -1,134 +1,135 @@
 {
+  "schema_version": "mercury.phase10-certification/v1",
   "gates": [
     {
       "gate_id": "horizons",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_horizons"
     },
     {
       "gate_id": "confidence_bands",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_confidence_bands"
     },
     {
       "gate_id": "limits",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_limits"
     },
     {
       "gate_id": "candidate_identity",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_candidate_identity"
     },
     {
       "gate_id": "prediction_identity",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_prediction_identity"
     },
     {
       "gate_id": "namespace_authorization",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_namespace_authorization"
     },
     {
       "gate_id": "namespace_isolation",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_namespace_isolation"
     },
     {
       "gate_id": "closed_namespace",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_closed_namespace"
     },
     {
       "gate_id": "lifecycle_eligibility",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_lifecycle_eligibility"
     },
     {
       "gate_id": "source_traceability",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_source_traceability"
     },
     {
       "gate_id": "source_immutability",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_source_immutability"
     },
     {
       "gate_id": "deterministic_features",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_deterministic_features"
     },
     {
       "gate_id": "bounded_confidence",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_bounded_confidence"
     },
     {
       "gate_id": "deterministic_confidence_band",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_deterministic_confidence_band"
     },
     {
       "gate_id": "deterministic_horizon",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_deterministic_horizon"
     },
     {
       "gate_id": "reason_codes",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_reason_codes"
     },
     {
       "gate_id": "conflict_preservation",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_conflict_preservation"
     },
     {
       "gate_id": "prediction_ordering",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_prediction_ordering"
     },
     {
       "gate_id": "prediction_limit",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_prediction_limit"
     },
     {
       "gate_id": "source_limit",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_source_limit"
     },
     {
       "gate_id": "no_semantic_ranking",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_no_semantic_ranking"
     },
     {
       "gate_id": "no_memory_persistence",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_no_memory_persistence"
     },
     {
       "gate_id": "no_prefetch_cache",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_no_prefetch_cache"
     },
     {
       "gate_id": "no_execution_control",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_no_execution_control"
     },
     {
       "gate_id": "no_user_profile_prediction",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_no_user_profile_prediction"
     },
     {
       "gate_id": "adversarial_integration",
       "passed": true,
-      "evidence": "verified by Phase 10 focused and integration tests"
+      "evidence": "Executable check: mercury.certification.phase10_checks.check_adversarial_integration"
     }
   ]
 }
