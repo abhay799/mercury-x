@@ -5,6 +5,7 @@ from mercury.hardware_personality.contracts import (
     HardwareCompatibilityState,
     HardwarePersonalityProfile,
     HardwareRequirement,
+    HardwareTrustState,
 )
 
 
@@ -12,6 +13,29 @@ def evaluate_hardware_compatibility(
     profile: HardwarePersonalityProfile,
     requirement: HardwareRequirement,
 ) -> HardwareCompatibilityResult:
+    if type(profile) is not HardwarePersonalityProfile:
+        raise ValueError("HardwarePersonalityProfile required")
+    if type(requirement) is not HardwareRequirement:
+        raise ValueError("HardwareRequirement required")
+
+    try:
+        profile = HardwarePersonalityProfile.model_validate(profile.model_dump())
+    except ValueError:
+        return HardwareCompatibilityResult(
+            requirement_id=requirement.requirement_id,
+            hardware_profile_id=profile.hardware_profile_id,
+            state=HardwareCompatibilityState.INCOMPATIBLE,
+            reason_codes=("PROFILE_INTEGRITY_INVALID",),
+        )
+
+    if profile.trust_state is not HardwareTrustState.VERIFIED:
+        return HardwareCompatibilityResult(
+            requirement_id=requirement.requirement_id,
+            hardware_profile_id=profile.hardware_profile_id,
+            state=HardwareCompatibilityState.INCOMPATIBLE,
+            reason_codes=("PROFILE_TRUST_NOT_VERIFIED",),
+        )
+
     incompatible = []
     unknown = []
 

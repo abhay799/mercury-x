@@ -1,4 +1,5 @@
 {
+  "schema_version": "mercury.phase15-certification/v1",
   "required_gates": [
     "contracts",
     "determinism",

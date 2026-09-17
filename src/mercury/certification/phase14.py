@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 from mercury.certification.phase14_checks import CHECKS
-def evaluate():
-    p=Path(__file__).parents[3]/"configs"/"certification"/"phase14.json"
+def evaluate(config_path: Path | None = None):
+    p=config_path or Path(__file__).parents[3]/"configs"/"certification"/"phase14.json"
     gates=json.loads(p.read_text())["required_gates"]
     if len(gates)!=len(set(gates)) or set(gates)!=set(CHECKS): raise ValueError("invalid phase14 manifest")
     out=[]

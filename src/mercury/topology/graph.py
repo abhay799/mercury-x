@@ -1,5 +1,8 @@
-import hashlib, json
-from mercury.topology.contracts import TopologyGraph
+from mercury.topology.contracts import (
+    TopologyGraph,
+    make_topology_graph_id,
+    topology_graph_fingerprint,
+)
 
 def build_topology_graph(*, nodes, links, generation=1):
     nodes = tuple(sorted(nodes, key=lambda x: x.topology_node_id))
@@ -13,9 +16,6 @@ def build_topology_graph(*, nodes, links, generation=1):
     for l in links:
         if l.source_node_id not in node_ids or l.destination_node_id not in node_ids:
             raise ValueError("dangling topology link")
-    body = {"nodes":[n.model_dump(mode="json") for n in nodes],
-            "links":[l.model_dump(mode="json") for l in links],
-            "generation":generation}
-    fp = hashlib.sha256(json.dumps(body,sort_keys=True,separators=(",",":")).encode()).hexdigest()
-    gid = hashlib.sha256(("topology:"+fp).encode()).hexdigest()
+    fp = topology_graph_fingerprint(nodes=nodes, links=links, generation=generation)
+    gid = make_topology_graph_id(fp)
     return TopologyGraph(topology_graph_id=gid,nodes=nodes,links=links,generation=generation,fingerprint=fp)

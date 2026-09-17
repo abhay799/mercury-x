@@ -96,7 +96,11 @@ def affinity_evidence():
 def compatibility_behavior():
     d = _descriptor()
     ev = (_evidence(d,"precision.FP32","supported"),)
-    p = build_hardware_personality_profile(descriptor=d, evidence=ev)
+    p = build_hardware_personality_profile(
+        descriptor=d,
+        evidence=ev,
+        trust_state=HardwareTrustState.VERIFIED,
+    )
     r = evaluate_hardware_compatibility(p, HardwareRequirement(
         requirement_id="r", required_precision=HardwarePrecision.FP32
     ))
@@ -105,7 +109,10 @@ def compatibility_behavior():
 
 def lifecycle_behavior():
     d = _descriptor()
-    p = build_hardware_personality_profile(descriptor=d, evidence=())
+    p = build_hardware_personality_profile(
+        descriptor=d,
+        evidence=(_evidence(d, "precision.FP32", "supported"),),
+    )
     v = transition_hardware_trust(p, HardwareTrustState.VERIFIED)
     s = transition_hardware_trust(v, HardwareTrustState.STALE)
     refreshed = refresh_hardware_profile(s, evidence=())

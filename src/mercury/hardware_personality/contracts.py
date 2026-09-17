@@ -126,6 +126,19 @@ class HardwareDescriptor(ContractModel):
             return None
         return _nonblank(value, info.field_name)
 
+    @model_validator(mode="after")
+    def validate_hardware_identity(self):
+        expected = make_hardware_id(
+            hardware_class=self.hardware_class,
+            vendor=self.vendor,
+            architecture=self.architecture,
+            device_family=self.device_family,
+            device_model=self.device_model,
+        )
+        if self.hardware_id != expected:
+            raise ValueError("hardware_id does not match canonical hardware identity")
+        return self
+
 
 class HardwareEvidenceRecord(ContractModel):
     evidence_id: str
@@ -142,6 +155,7 @@ class HardwareEvidenceRecord(ContractModel):
     generation: int = Field(ge=1)
     verification_status: bool
     evidence_fingerprint: str
+    derived_from_evidence_ids: tuple[str, ...] = ()
 
     @field_validator("evidence_id", "hardware_id", "property_name", "source_id", "evidence_fingerprint")
     @classmethod
@@ -155,19 +169,45 @@ class HardwareEvidenceRecord(ContractModel):
             return None
         return _nonblank(value, info.field_name)
 
+    @field_validator("derived_from_evidence_ids")
+    @classmethod
+    def derived_sources(cls, value):
+        return _canonical_strings(value, "derived_from_evidence_ids")
+
     @model_validator(mode="after")
     def validate_evidence_shape(self):
         if self.evidence_class is HardwareEvidenceClass.DECLARED:
             if self.declared_value is None:
                 raise ValueError("DECLARED evidence requires declared_value")
+            if self.observed_value is not None:
+                raise ValueError("DECLARED evidence must not include observed_value")
         elif self.evidence_class in (HardwareEvidenceClass.PROBED, HardwareEvidenceClass.MEASURED):
             if self.observed_value is None:
                 raise ValueError(f"{self.evidence_class.value} evidence requires observed_value")
         elif self.evidence_class is HardwareEvidenceClass.DERIVED:
             if self.observed_value is None:
                 raise ValueError("DERIVED evidence requires observed_value")
+            if not self.derived_from_evidence_ids:
+                raise ValueError("DERIVED evidence requires source evidence lineage")
+        elif self.derived_from_evidence_ids:
+            raise ValueError("only DERIVED evidence may include source evidence lineage")
         if self.evidence_class is HardwareEvidenceClass.MEASURED and self.benchmark_id is None:
             raise ValueError("MEASURED evidence requires benchmark_id")
+        if self.evidence_class is HardwareEvidenceClass.PROBED and self.probe_id is None:
+            raise ValueError("PROBED evidence requires probe_id")
+        expected_id, expected_fingerprint = make_evidence_id(
+            hardware_id=self.hardware_id,
+            evidence_class=self.evidence_class,
+            property_name=self.property_name,
+            source_id=self.source_id,
+            sequence=self.sequence,
+            generation=self.generation,
+            declared_value=self.declared_value,
+            observed_value=self.observed_value,
+            derived_from_evidence_ids=self.derived_from_evidence_ids,
+        )
+        if self.evidence_id != expected_id or self.evidence_fingerprint != expected_fingerprint:
+            raise ValueError("evidence identity does not match evidence content")
         return self
 
 
@@ -274,6 +314,35 @@ class HardwarePersonalityProfile(ContractModel):
             raise ValueError("workload_affinities must be canonical")
         return result
 
+    @model_validator(mode="after")
+    def validate_profile_integrity(self):
+        expected_id = make_profile_identity(
+            hardware_id=self.descriptor.hardware_id,
+            profile_generation=self.profile_generation,
+        )
+        if self.hardware_profile_id != expected_id:
+            raise ValueError("hardware_profile_id does not match descriptor identity and generation")
+        if self.trust_state is HardwareTrustState.VERIFIED and not self.evidence_record_ids:
+            raise ValueError("VERIFIED profile requires evidence")
+        if self.profile_fingerprint != make_hardware_profile_fingerprint(
+            hardware_profile_id=self.hardware_profile_id,
+            descriptor=self.descriptor,
+            capabilities=self.capabilities,
+            supported_precisions=self.supported_precisions,
+            declared_memory_bandwidth_bytes_per_s=self.declared_memory_bandwidth_bytes_per_s,
+            measured_memory_bandwidth_bytes_per_s=self.measured_memory_bandwidth_bytes_per_s,
+            interconnect_capabilities=self.interconnect_capabilities,
+            runtime_capabilities=self.runtime_capabilities,
+            software_stack=self.software_stack,
+            power_constraints=self.power_constraints,
+            evidence_record_ids=self.evidence_record_ids,
+            workload_affinities=self.workload_affinities,
+            profile_generation=self.profile_generation,
+            trust_state=self.trust_state,
+        ):
+            raise ValueError("profile_fingerprint does not match profile content")
+        return self
+
 
 class HardwareRequirement(ContractModel):
     requirement_id: str
@@ -336,6 +405,7 @@ def make_evidence_id(
     generation: int,
     declared_value: str | None = None,
     observed_value: str | None = None,
+    derived_from_evidence_ids: tuple[str, ...] = (),
 ) -> tuple[str, str]:
     payload = {
         "hardware_id": _nonblank(hardware_id, "hardware_id"),
@@ -346,6 +416,9 @@ def make_evidence_id(
         "generation": generation,
         "declared_value": declared_value,
         "observed_value": observed_value,
+        "derived_from_evidence_ids": list(
+            _canonical_strings(derived_from_evidence_ids, "derived_from_evidence_ids")
+        ),
     }
     fingerprint = _stable_hash(payload)
     return fingerprint, fingerprint
@@ -358,5 +431,43 @@ def make_profile_identity(*, hardware_id: str, profile_generation: int) -> str:
         {
             "hardware_id": _nonblank(hardware_id, "hardware_id"),
             "profile_generation": profile_generation,
+        }
+    )
+
+
+def make_hardware_profile_fingerprint(
+    *,
+    hardware_profile_id: str,
+    descriptor: HardwareDescriptor,
+    capabilities: tuple[CapabilityAssessment, ...],
+    supported_precisions: tuple[HardwarePrecision, ...],
+    declared_memory_bandwidth_bytes_per_s: int | None,
+    measured_memory_bandwidth_bytes_per_s: int | None,
+    interconnect_capabilities: tuple[str, ...],
+    runtime_capabilities: tuple[str, ...],
+    software_stack: tuple[str, ...],
+    power_constraints: tuple[str, ...],
+    evidence_record_ids: tuple[str, ...],
+    workload_affinities: tuple[HardwareWorkloadAffinity, ...],
+    profile_generation: int,
+    trust_state: HardwareTrustState,
+) -> str:
+    """Return the deterministic integrity fingerprint for a logical profile."""
+    return _stable_hash(
+        {
+            "hardware_profile_id": hardware_profile_id,
+            "descriptor": descriptor.model_dump(mode="json"),
+            "capabilities": [item.model_dump(mode="json") for item in capabilities],
+            "supported_precisions": [item.value for item in supported_precisions],
+            "declared_memory_bandwidth_bytes_per_s": declared_memory_bandwidth_bytes_per_s,
+            "measured_memory_bandwidth_bytes_per_s": measured_memory_bandwidth_bytes_per_s,
+            "interconnect_capabilities": list(interconnect_capabilities),
+            "runtime_capabilities": list(runtime_capabilities),
+            "software_stack": list(software_stack),
+            "power_constraints": list(power_constraints),
+            "evidence_record_ids": list(evidence_record_ids),
+            "workload_affinities": [item.model_dump(mode="json") for item in workload_affinities],
+            "profile_generation": profile_generation,
+            "trust_state": trust_state.value,
         }
     )
