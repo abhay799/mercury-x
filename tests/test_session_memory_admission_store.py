@@ -13,3 +13,7 @@ def test_explicit_admission_and_session_partitioning():
 def test_nonretainable_and_explicit_secret_rejected():
  assert not evaluate_memory_admission(record(),"s",retainable=False).accepted
  assert not evaluate_memory_admission(record(),"s",retainable=True,classification="credential").accepted
+def test_closed_session_is_exact_and_rejects_future_writes():
+ store=SessionMemoryStore().close_session("s",closure_sequence=1,policy_id="close")
+ assert store.is_session_closed("s") and not store.is_session_closed("other")
+ with pytest.raises(ValueError): register_session_memory_record(store,record(),"s")
