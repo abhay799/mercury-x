@@ -12,7 +12,7 @@ def _text(v):
  if not isinstance(v,str) or not v.strip(): raise ValueError("required value must be nonblank")
  return v
 class SessionMemoryRecord(ContractModel):
- schema_version:str="mercury.session-memory/v1"; session_id:str; task_id:str; turn_id:str; record_id:str; record_version:int; source_phase:str; source_artifact_id:str; memory_type:SessionMemoryType; scope:SessionMemoryScope; creation_sequence:int; lifecycle:SessionMemoryLifecycle; retention_sequence:int|None=None; provenance:tuple[str,...]
+ schema_version:str="mercury.session-memory/v1"; session_id:str; task_id:str; turn_id:str; record_id:str; record_version:int; source_phase:str; source_artifact_id:str; memory_type:SessionMemoryType; scope:SessionMemoryScope; creation_sequence:int; lifecycle:SessionMemoryLifecycle; retention_sequence:int|None=None; source_lineage_id:str|None=None; retrieval_key:str|None=None; provenance:tuple[str,...]
  @field_validator("session_id","task_id","turn_id","record_id","source_phase","source_artifact_id")
  @classmethod
  def ids(cls,v): return _text(v)
@@ -28,7 +28,20 @@ class SessionMemoryRecord(ContractModel):
   return tuple(sorted(set(v)))
 class SessionMemoryAdmissionRequest(ContractModel): record:SessionMemoryRecord
 class SessionMemoryAdmissionResult(ContractModel): status:SessionMemoryPhaseStatus; record:SessionMemoryRecord|None=None; reason:str|None=None
-class SessionMemoryQuery(ContractModel): session_id:str; limit:int=Field(ge=1,le=MAX_RETRIEVED_RECORDS)
+class SessionMemoryQuery(ContractModel):
+ session_id:str; limit:int=Field(default=MAX_RETRIEVED_RECORDS,ge=1,le=MAX_RETRIEVED_RECORDS); task_id:str|None=None; turn_id_min:str|None=None; turn_id_max:str|None=None; memory_types:tuple[SessionMemoryType,...]=(); scope:SessionMemoryScope|None=None; source_artifact_id:str|None=None; source_lineage_id:str|None=None; retrieval_key:str|None=None; lifecycle:SessionMemoryLifecycle|None=None
+ @field_validator("session_id","task_id","turn_id_min","turn_id_max","source_artifact_id","source_lineage_id","retrieval_key")
+ @classmethod
+ def query_text(cls,v): return None if v is None else _text(v)
+ @field_validator("memory_types")
+ @classmethod
+ def canonical_types(cls,v): return tuple(sorted(set(v),key=lambda x:x.value))
+ @field_validator("turn_id_max")
+ @classmethod
+ def bounds(cls,v,info):
+  lower=info.data.get("turn_id_min")
+  if v is not None and lower is not None and lower>v: raise ValueError("turn_id_min must not exceed turn_id_max")
+  return v
 class SessionMemoryRetrievalResult(ContractModel): status:SessionMemoryPhaseStatus; records:tuple[SessionMemoryRecord,...]; provenance:tuple[str,...]=()
 class SessionMemoryCompactionRequest(ContractModel): session_id:str; records:tuple[SessionMemoryRecord,...]
 class SessionMemoryCompactionResult(ContractModel): status:SessionMemoryPhaseStatus; record:SessionMemoryRecord|None=None; reason:str|None=None
