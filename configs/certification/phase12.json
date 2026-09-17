@@ -1,0 +1,209 @@
+{
+  "gates": [
+    {
+      "gate_id": "segment_types",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "execution_states",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "handoff_kinds",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "handoff_states",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "limits",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "segment_identity",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "handoff_identity",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "plan_identity",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "plan_fingerprint",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "acyclic_graph",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "self_dependency",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "dangling_dependency",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "duplicate_segment",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "entry_terminal_detection",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "namespace_authorization",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "namespace_isolation",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "closed_namespace",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "handoff_endpoints",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "handoff_transitions",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "readiness_dependencies",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "readiness_handoffs",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "execution_transitions",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "cancellation_terminal",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "retry_limit",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "retry_eligibility",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "failure_classification",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "kv_compatibility",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "stale_invalidated_kv",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "prediction_hint_only",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "source_immutability",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "verification_before_success",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "result_stitching",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "missing_terminal_result",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "result_lineage",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "no_model_selection",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "no_precision_selection",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "no_hardware_placement",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "no_global_scheduling",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "no_migration",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "no_user_profile_prediction",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    },
+    {
+      "gate_id": "adversarial_integration",
+      "passed": true,
+      "evidence": "verified by Phase 12 focused and integration tests"
+    }
+  ]
+}
