@@ -1,0 +1,7 @@
+{
+  "schema_version": "phase23-cert-v1",
+  "required_gates": [
+    "robust",
+    "catches_failure"
+  ]
+}

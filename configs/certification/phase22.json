@@ -1,0 +1,8 @@
+{
+  "schema_version": "phase22-cert-v1",
+  "required_gates": [
+    "contracts",
+    "safety",
+    "reject_unsafe"
+  ]
+}

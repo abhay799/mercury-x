@@ -1,0 +1,7 @@
+{
+  "schema_version": "phase25-cert-v1",
+  "required_gates": [
+    "shadow_only",
+    "approval_required"
+  ]
+}

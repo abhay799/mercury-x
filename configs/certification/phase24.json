@@ -1,0 +1,7 @@
+{
+  "schema_version": "phase24-cert-v1",
+  "required_gates": [
+    "advisory",
+    "unknown_fail_closed"
+  ]
+}
