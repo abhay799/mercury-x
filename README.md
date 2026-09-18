@@ -128,6 +128,14 @@ flowchart LR
 
 See [MERCURY_X_ARCHITECTURE.md](docs/architecture/MERCURY_X_ARCHITECTURE.md) for the detailed architecture and runtime boundaries.
 
+## Architecture Diagrams
+
+- [System overview](docs/architecture/diagrams/SYSTEM_OVERVIEW.md) — the flagship logical control-plane view
+- [Phase architecture](docs/architecture/diagrams/PHASE_ARCHITECTURE.md) — all phases from 0 through 30
+- [Execution lifecycle](docs/architecture/diagrams/EXECUTION_LIFECYCLE.md) — normal and fail-closed decision paths
+- [Safety control plane](docs/architecture/diagrams/SAFETY_CONTROL_PLANE.md) — hard invariant gates around action
+- [Migration and recovery](docs/architecture/diagrams/MIGRATION_AND_RECOVERY.md) — Phase 21–22 cutover, rollback, and healing
+
 ## Important Safety Invariants
 
 - Unknown, incomplete, contradictory, or stale evidence fails closed.
@@ -269,4 +277,3 @@ Phases 0–30 are complete. Future work is productization rather than another nu
 - reproducibility
 - explicit uncertainty
 - end-to-end provenance
-

@@ -18,6 +18,14 @@ The architecture is primarily a control plane. A phase may describe, validate, p
 8. **Simulation isolation.** Counterfactual and twin results remain advisory.
 9. **CPU-first development.** Control logic runs locally without requiring accelerators.
 
+### Diagram Navigation
+
+- [System overview](diagrams/SYSTEM_OVERVIEW.md)
+- [Phase 0–30 architecture](diagrams/PHASE_ARCHITECTURE.md)
+- [Execution lifecycle](diagrams/EXECUTION_LIFECYCLE.md)
+- [Safety control plane](diagrams/SAFETY_CONTROL_PLANE.md)
+- [Migration and recovery](diagrams/MIGRATION_AND_RECOVERY.md)
+
 ## 3. Layered Architecture
 
 ```mermaid
@@ -195,4 +203,3 @@ Fail closed does not always mean a process crash. Depending on the contract, it 
 The repository demonstrates architecture and control logic locally. It does not by itself provide a production resource manager, GPU kernel/runtime, container orchestrator, cloud control plane, real multi-datacenter network, hardware security module, or calibrated physical-facility simulator. Interfaces that name hardware, placement, migration, federation, or runtime state should not be confused with proof of real-world deployment.
 
 For the claim boundary, see [../LIMITATIONS.md](../LIMITATIONS.md). For validation practice, see [../VALIDATION.md](../VALIDATION.md).
-
