@@ -39,9 +39,16 @@ def _run(
         check=False,
     )
     duration = round(time.perf_counter() - started, 3)
-    combined = "\n".join(part.strip() for part in (completed.stdout, completed.stderr) if part.strip())
+
+    combined = "\n".join(
+        part.strip()
+        for part in (completed.stdout, completed.stderr)
+        if part.strip()
+    )
+
     summary_lines = combined.splitlines()[-20:]
     passed_match = re.search(r"(?P<count>\d+) passed", combined)
+
     return {
         "id": check_id,
         "command": list(command),
@@ -54,7 +61,11 @@ def _run(
     }
 
 
-def _skipped(check_id: str, classifications: Sequence[str], reason: str) -> dict[str, Any]:
+def _skipped(
+    check_id: str,
+    classifications: Sequence[str],
+    reason: str,
+) -> dict[str, Any]:
     return {
         "id": check_id,
         "command": [],
@@ -82,80 +93,178 @@ def _git(*args: str) -> str:
 
 def _certification_test_files() -> list[str]:
     tests = ROOT / "tests"
+
     selected = {
         tests / "test_certification_framework.py",
         tests / "test_phase0_integration.py",
         *tests.glob("test_phase*_certification.py"),
         *tests.glob("test_phase*_certification_manifests.py"),
     }
-    return [str(path.relative_to(ROOT)) for path in sorted(selected)]
+
+    return [
+        str(path.relative_to(ROOT))
+        for path in sorted(selected)
+    ]
 
 
 def _inventory() -> dict[str, Any]:
     expected_phases = list(range(31))
+
     missing_manifests = [
         phase
         for phase in expected_phases
-        if not (ROOT / "configs" / "certification" / f"phase{phase}.json").is_file()
+        if not (
+            ROOT
+            / "configs"
+            / "certification"
+            / f"phase{phase}.json"
+        ).is_file()
     ]
+
     missing_evaluators = [
         phase
         for phase in expected_phases
-        if not (ROOT / "src" / "mercury" / "certification" / f"phase{phase}.py").is_file()
+        if not (
+            ROOT
+            / "src"
+            / "mercury"
+            / "certification"
+            / f"phase{phase}.py"
+        ).is_file()
     ]
+
     return {
         "phase_range": "0-30",
         "expected_phase_count": 31,
         "missing_manifests": missing_manifests,
         "missing_evaluators": missing_evaluators,
-        "status": "PASS" if not missing_manifests and not missing_evaluators else "FAIL",
+        "status": (
+            "PASS"
+            if not missing_manifests and not missing_evaluators
+            else "FAIL"
+        ),
         "classification": "SYNTHETIC",
-        "claim_boundary": "Repository artifact coverage only; not third-party certification.",
+        "claim_boundary": (
+            "Repository artifact coverage only; "
+            "not third-party certification."
+        ),
     }
+
+
+def _pytest_temp_paths(prefix: str) -> tuple[Path, Path]:
+    """
+    Create unique Windows-safe pytest basetemp and cache paths.
+
+    MERCURY certification tests exercise malformed/missing manifest
+    behavior and use pytest temporary directories extensively. Giving
+    every evidence check its own isolated temp/cache paths prevents
+    stale or locked Windows pytest artifacts from affecting evidence
+    collection.
+    """
+    stamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S%f")
+    temp_root = Path(tempfile.gettempdir())
+
+    base_temp = temp_root / f"mercury-{prefix}-pytest-{stamp}"
+    cache = temp_root / f"mercury-{prefix}-cache-{stamp}"
+
+    return base_temp, cache
 
 
 def build_snapshot(*, include_python_tests: bool) -> dict[str, Any]:
     python = sys.executable
     npm = "npm.cmd" if os.name == "nt" else "npm"
+
     checks: list[dict[str, Any]] = []
 
+    # -------------------------------------------------------------
+    # Certification-focused pytest evidence
+    # -------------------------------------------------------------
     certification_files = _certification_test_files()
+    certification_base_temp, certification_cache = _pytest_temp_paths(
+        "certification"
+    )
+
     checks.append(
         _run(
             "certification_tests",
-            [python, "-m", "pytest", *certification_files, "-q"],
+            [
+                python,
+                "-m",
+                "pytest",
+                *certification_files,
+                "-q",
+                f"--basetemp={certification_base_temp}",
+                "-o",
+                f"cache_dir={certification_cache}",
+            ],
             ["MEASURED", "SYNTHETIC"],
         )
     )
+
+    # -------------------------------------------------------------
+    # Phase 30 certification CLI
+    # -------------------------------------------------------------
     checks.append(
         _run(
             "phase30_certification_cli",
-            [python, "-m", "mercury.certification.phase30"],
+            [
+                python,
+                "-m",
+                "mercury.certification.phase30",
+            ],
             ["MEASURED", "SYNTHETIC"],
         )
     )
+
+    # -------------------------------------------------------------
+    # Control Center validation
+    # -------------------------------------------------------------
     checks.append(
         _run(
             "control_center_validation",
-            [npm, "run", "check"],
-            ["MEASURED", "STATIC_DEMO", "SYNTHETIC"],
-            cwd=ROOT / "ui" / "control-center",
-        )
-    )
-    checks.append(
-        _run(
-            "scenario_validation",
-            [npm, "run", "check:scenarios"],
-            ["MEASURED", "STATIC_DEMO", "SYNTHETIC", "SIMULATED"],
+            [
+                npm,
+                "run",
+                "check",
+            ],
+            [
+                "MEASURED",
+                "STATIC_DEMO",
+                "SYNTHETIC",
+            ],
             cwd=ROOT / "ui" / "control-center",
         )
     )
 
+    # -------------------------------------------------------------
+    # Scenario validation
+    # -------------------------------------------------------------
+    checks.append(
+        _run(
+            "scenario_validation",
+            [
+                npm,
+                "run",
+                "check:scenarios",
+            ],
+            [
+                "MEASURED",
+                "STATIC_DEMO",
+                "SYNTHETIC",
+                "SIMULATED",
+            ],
+            cwd=ROOT / "ui" / "control-center",
+        )
+    )
+
+    # -------------------------------------------------------------
+    # Full Python regression
+    # -------------------------------------------------------------
     if include_python_tests:
-        stamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
-        temp_root = Path(tempfile.gettempdir())
-        base_temp = temp_root / f"mercury-pytest-{stamp}"
-        cache = temp_root / f"mercury-cache-{stamp}"
+        regression_base_temp, regression_cache = _pytest_temp_paths(
+            "regression"
+        )
+
         checks.append(
             _run(
                 "python_full_regression",
@@ -165,9 +274,9 @@ def build_snapshot(*, include_python_tests: bool) -> dict[str, Any]:
                     "pytest",
                     "tests",
                     "-q",
-                    f"--basetemp={base_temp}",
+                    f"--basetemp={regression_base_temp}",
                     "-o",
-                    f"cache_dir={cache}",
+                    f"cache_dir={regression_cache}",
                 ],
                 ["MEASURED", "SYNTHETIC"],
             )
@@ -177,67 +286,152 @@ def build_snapshot(*, include_python_tests: bool) -> dict[str, Any]:
             _skipped(
                 "python_full_regression",
                 ["NOT_MEASURED"],
-                "Skipped by --skip-python-tests; no current regression claim is emitted.",
+                (
+                    "Skipped by --skip-python-tests; "
+                    "no current regression claim is emitted."
+                ),
             )
         )
 
     inventory = _inventory()
-    failed_checks = [check["id"] for check in checks if check["outcome"] == "FAIL"]
+
+    failed_checks = [
+        check["id"]
+        for check in checks
+        if check["outcome"] == "FAIL"
+    ]
+
     if inventory["status"] == "FAIL":
         failed_checks.append("certification_inventory")
+
     return {
         "schema_version": SNAPSHOT_SCHEMA,
         "generated_at_utc": datetime.now(UTC).isoformat(),
         "git": {
             "commit": _git("rev-parse", "HEAD"),
-            "dirty": bool(_git("status", "--short", "--untracked-files=all")),
+            "dirty": bool(
+                _git(
+                    "status",
+                    "--short",
+                    "--untracked-files=all",
+                )
+            ),
         },
         "environment": {
             "platform": platform.system(),
             "platform_release": platform.release(),
             "architecture": platform.machine(),
             "python": platform.python_version(),
-            "node": _run("node_version", ["node", "--version"], ["MEASURED"])["output_tail"],
-            "npm": _run("npm_version", [npm, "--version"], ["MEASURED"])["output_tail"],
+            "node": _run(
+                "node_version",
+                ["node", "--version"],
+                ["MEASURED"],
+            )["output_tail"],
+            "npm": _run(
+                "npm_version",
+                [npm, "--version"],
+                ["MEASURED"],
+            )["output_tail"],
         },
         "certification_inventory": inventory,
         "checks": checks,
         "summary": {
-            "overall_status": "PASS" if not failed_checks else "FAIL",
-            "passed": sum(check["outcome"] == "PASS" for check in checks),
-            "failed": sum(check["outcome"] == "FAIL" for check in checks),
-            "not_run": sum(check["outcome"] == "NOT_RUN" for check in checks),
+            "overall_status": (
+                "PASS"
+                if not failed_checks
+                else "FAIL"
+            ),
+            "passed": sum(
+                check["outcome"] == "PASS"
+                for check in checks
+            ),
+            "failed": sum(
+                check["outcome"] == "FAIL"
+                for check in checks
+            ),
+            "not_run": sum(
+                check["outcome"] == "NOT_RUN"
+                for check in checks
+            ),
             "failed_check_ids": failed_checks,
         },
         "claim_boundary": (
-            "Local control-plane validation only. It does not measure accelerator, cloud, network, "
-            "production scheduler, model-quality, migration-downtime, or datacenter performance."
+            "Local control-plane validation only. "
+            "It does not measure accelerator, cloud, network, "
+            "production scheduler, model-quality, migration-downtime, "
+            "or datacenter performance."
         ),
     }
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser = argparse.ArgumentParser(
+        description=__doc__
+    )
+
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=DEFAULT_OUTPUT,
+    )
+
     parser.add_argument(
         "--skip-python-tests",
         action="store_true",
-        help="Run evidence and certification checks without claiming a current full regression result.",
+        help=(
+            "Run evidence and certification checks without claiming "
+            "a current full regression result."
+        ),
     )
+
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    output = args.output if args.output.is_absolute() else ROOT / args.output
-    snapshot = build_snapshot(include_python_tests=not args.skip_python_tests)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(snapshot, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    output = (
+        args.output
+        if args.output.is_absolute()
+        else ROOT / args.output
+    )
+
+    snapshot = build_snapshot(
+        include_python_tests=not args.skip_python_tests
+    )
+
+    output.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    output.write_text(
+        json.dumps(
+            snapshot,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
     print(f"Evidence snapshot: {output}")
-    print(f"Overall status: {snapshot['summary']['overall_status']}")
+    print(
+        f"Overall status: "
+        f"{snapshot['summary']['overall_status']}"
+    )
+
     for check in snapshot["checks"]:
-        print(f"{check['id']}: {check['outcome']}")
-    return 0 if snapshot["summary"]["overall_status"] == "PASS" else 1
+        print(
+            f"{check['id']}: "
+            f"{check['outcome']}"
+        )
+
+    return (
+        0
+        if snapshot["summary"]["overall_status"] == "PASS"
+        else 1
+    )
 
 
 if __name__ == "__main__":
