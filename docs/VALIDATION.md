@@ -57,14 +57,31 @@ The repository reached **1506 passing tests** during final Phase 26–30 validat
 
 | Category | Meaning | Appropriate claim |
 |---|---|---|
-| Synthetic | Constructed fixtures used to exercise contracts and boundary conditions | The code handles the tested logical scenario. |
-| Simulated | Output from a model of a scheduler, topology, migration, counterfactual, or datacenter state | The control logic behaves as tested inside that simulation. |
-| Measured | Observation captured from a named real system under a documented method | Only the measured property, environment, and sample may be claimed. |
-| Calibrated | A model linked to explicit calibration artifacts/data and a supported operating domain | Accuracy claims remain limited to that evidence and domain. |
+| `MEASURED` | Observation from an executed command or named real system under a documented method | Only the recorded property, environment, command, and sample. |
+| `SYNTHETIC` | Constructed fixtures or generated workloads rather than production traffic | The code handles the tested logical scenario. |
+| `SIMULATED` | Output from a software model of a scheduler, topology, migration, counterfactual, or datacenter state | The control logic behaves as tested inside that simulation. |
+| `STATIC_DEMO` | Maintained fixture rendered without live telemetry or control authority | The UI presents deterministic demonstration state. |
+| `UNCALIBRATED` | Model output without empirical calibration evidence for predictive accuracy | Advisory behavior only; no accuracy claim. |
+| `NOT_MEASURED` | No responsible empirical measurement exists in maintained evidence | No quantitative result may be inferred or estimated. |
 
-Synthetic and simulated evidence must not be relabeled as measured. An interface for an empirical or learned backend does not prove that a calibrated model or trained artifact exists.
+Classifications can be combined: a locally executed test is `MEASURED` as a command outcome while its fixtures remain `SYNTHETIC`. Synthetic, simulated, static-demo, and uncalibrated evidence must not be relabeled as real infrastructure measurement. An interface for an empirical or learned backend does not prove that a calibrated model or trained artifact exists.
+
+## Reproducible Evidence Surface
+
+The maintained inventory and interpretation rules are in:
+
+- [`evidence/EVIDENCE_MANIFEST.json`](evidence/EVIDENCE_MANIFEST.json);
+- [`evidence/BENCHMARKS_AND_EVIDENCE.md`](evidence/BENCHMARKS_AND_EVIDENCE.md).
+
+Validate them and generate a local snapshot from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\evidence\validate_evidence.py
+.\.venv\Scripts\python.exe scripts\evidence\run_evidence.py
+```
+
+The generated `artifacts/evidence/mercury_evidence.json` is machine-specific, Git-ignored, and authoritative only for its recorded commit and environment. Command duration is reproducibility metadata, not a control-plane performance benchmark.
 
 ## Completion Criteria
 
 A phase is considered internally complete when its scoped contracts and engines exist, focused and integration tests pass, required certification gates pass with evidence, compatibility is retained, and no unresolved in-scope safety blocker remains. This status does not imply operational readiness for production infrastructure.
-

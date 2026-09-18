@@ -41,6 +41,7 @@ logs/
 *.log
 telemetry/local/
 artifacts/runtime/
+artifacts/evidence/
 checkpoints/local/
 
 # Local caches

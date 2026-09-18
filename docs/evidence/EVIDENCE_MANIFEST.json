@@ -1,0 +1,147 @@
+{
+  "schema_version": "mercury.evidence-manifest/v1",
+  "snapshot_schema_version": "mercury.evidence-snapshot/v1",
+  "snapshot_path": "artifacts/evidence/mercury_evidence.json",
+  "taxonomy": {
+    "MEASURED": "Observed by an executed command in a named local environment; limited to the property and context recorded.",
+    "SYNTHETIC": "Produced from constructed fixtures or generated workloads rather than production traffic.",
+    "SIMULATED": "Produced by a software model of a system or event rather than the physical system represented.",
+    "STATIC_DEMO": "Rendered from maintained demonstration fixtures without live telemetry or control-plane authority.",
+    "UNCALIBRATED": "Produced by a model lacking empirical calibration evidence for predictive-accuracy claims.",
+    "NOT_MEASURED": "No responsible empirical measurement exists in the maintained repository evidence."
+  },
+  "evidence": [
+    {
+      "id": "phase_coverage",
+      "classifications": [
+        "SYNTHETIC"
+      ],
+      "sources": [
+        "src/mercury/",
+        "tests/",
+        "configs/certification/"
+      ],
+      "claim_boundary": "Artifact inventory supports internal Phase 0-30 implementation coverage only."
+    },
+    {
+      "id": "python_tests",
+      "classifications": [
+        "MEASURED",
+        "SYNTHETIC"
+      ],
+      "sources": [
+        "tests/"
+      ],
+      "claim_boundary": "A passing local regression establishes behavior for tested fixtures, not production performance."
+    },
+    {
+      "id": "certification",
+      "classifications": [
+        "MEASURED",
+        "SYNTHETIC"
+      ],
+      "sources": [
+        "configs/certification/",
+        "src/mercury/certification/",
+        "tests/test_phase*_certification.py"
+      ],
+      "claim_boundary": "These are repository architecture/completeness gates, not external certification."
+    },
+    {
+      "id": "control_center",
+      "classifications": [
+        "MEASURED",
+        "STATIC_DEMO",
+        "SYNTHETIC"
+      ],
+      "sources": [
+        "ui/control-center/"
+      ],
+      "claim_boundary": "Validation proves static fixture rendering and provenance boundaries, not live telemetry."
+    },
+    {
+      "id": "demo_scenarios",
+      "classifications": [
+        "MEASURED",
+        "STATIC_DEMO",
+        "SYNTHETIC",
+        "SIMULATED"
+      ],
+      "sources": [
+        "ui/control-center/src/scenarios/",
+        "ui/control-center/scripts/validate-scenarios.mjs"
+      ],
+      "claim_boundary": "Scenario behavior is deterministic demonstration evidence, not observed infrastructure behavior."
+    },
+    {
+      "id": "digital_twin",
+      "classifications": [
+        "SIMULATED",
+        "UNCALIBRATED"
+      ],
+      "sources": [
+        "src/mercury/datacenter_twin/",
+        "tests/test_phase28_datacenter_twin.py"
+      ],
+      "claim_boundary": "Outputs are advisory simulation; predictive accuracy is not established."
+    },
+    {
+      "id": "performance",
+      "classifications": [
+        "NOT_MEASURED"
+      ],
+      "sources": [],
+      "claim_boundary": "No production infrastructure performance claim is supported by this baseline."
+    }
+  ],
+  "unsupported_measurements": [
+    {
+      "id": "gpu_inference_throughput",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "multi_gpu_scaling",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "cloud_distributed_throughput",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "network_transfer_performance",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "physical_live_migration_downtime",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "physical_gpu_memory_migration",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "datacenter_power_savings",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "production_scheduler_improvement",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "model_quality_improvement",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "digital_twin_prediction_accuracy",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "production_federation_latency",
+      "classification": "NOT_MEASURED"
+    },
+    {
+      "id": "real_world_cost_savings",
+      "classification": "NOT_MEASURED"
+    }
+  ]
+}

@@ -1,68 +1,53 @@
-# MERCURY X Environment Baseline
+# MERCURY X Environment
 
-Status: PRE-DEVELOPMENT BASELINE
+## Current supported local research environment
 
-## Project
-- Name: MERCURY X — Autonomous Cognitive Compute Fabric
-- Development OS: Windows
-- Primary shell: PowerShell
-- IDE: Visual Studio Code
-- Environment strategy: one project-local `.venv`
+MERCURY X is developed and validated as a CPU-first control plane. The primary environment is:
 
-## Verified Runtime
-- Python: 3.13.9
-- pytest: 9.1.1
-- pluggy: 1.6.0
-- pytest-asyncio: 1.4.0
-- setuptools: 84.0.0 (pinned build prerequisite)
-- Project package: `mercury-x 0.0.0` installed editable from this repository
+- Windows with PowerShell;
+- Python 3.13 (`>=3.13,<3.14` in package metadata);
+- a repository-local `.venv`;
+- dependencies pinned by `requirements.txt`;
+- an editable installation of this repository;
+- Node.js/npm for dependency-free Control Center validation.
 
-## Verified Baseline Tests
-- `tests/test_execution_graph.py` — PASS
-- `tests/test_workload.py` — PASS
-- Baseline result: 2 passed
+The environment observed during this productization pass is Python 3.13.9 and npm 11.16.0. That observation is `MEASURED` environment context, not a portability or performance claim.
 
-## Current Verification
-
-The two-test result above is historical only. The current preflight regression
-total is recorded only after a fresh full-suite run in the certification
-record. Focused environment verification includes a direct root-level
-`import mercury` subprocess check without pytest path injection.
-
-Current preflight remediation result: `61 passed` via
-`.\.venv\Scripts\python.exe -m pytest tests -v`.
-
-## Setup / Refresh
-
-`requirements.txt` is the canonical pinned dependency lock for this
-pre-development baseline. Use the repository-local interpreter; do not rely on
-the system Python installation.
+## Setup and refresh
 
 ```powershell
+py -3.13 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m pip install --no-deps --no-build-isolation -e .
-```
-
-The editable install makes the `src/mercury` package importable from the
-repository root without relying on pytest's `pythonpath` setting.
-
-## Execution Strategy
-MERCURY X is CPU-first for local development and control-plane work.
-GPU execution is abstracted behind worker/provider interfaces so later phases can use
-local GPU, remote GPU, Kaggle/Colab, or cloud resources without changing core contracts.
-
-## Environment Rules
-1. Use `.venv` for this repository.
-2. Do not commit `.venv`.
-3. Do not commit secrets, API keys, credentials, tokens, or private endpoints.
-4. Update the dependency lock whenever project dependencies intentionally change.
-5. Record measured hardware/runtime results separately from simulated results.
-6. Re-run the baseline test suite after environment changes.
-
-## Revalidation
-```powershell
-.\.venv\Scripts\python.exe --version
-.\.venv\Scripts\python.exe -m pip --version
 .\.venv\Scripts\python.exe -c "import mercury; print(mercury.__file__)"
-.\.venv\Scripts\python.exe -m pytest tests -v
 ```
+
+Use the repository-local interpreter rather than relying on system Python. See [docs/RUNNING.md](docs/RUNNING.md) for validation, certification, evidence, and Control Center commands.
+
+## Current validation practice
+
+Fresh results are generated rather than copied from historical documentation:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\evidence\run_evidence.py
+```
+
+The generated snapshot is local, machine-readable evidence and remains Git-ignored. Historical test totals are not treated as current measurements.
+
+## Environment rules
+
+1. Do not commit `.venv`, caches, generated evidence snapshots, secrets, credentials, tokens, or private endpoints.
+2. Update `requirements.txt` when dependencies intentionally change.
+3. Record measured results separately from synthetic, simulated, static-demo, uncalibrated, and not-measured evidence.
+4. Run the full regression after environment or packaging changes.
+5. Keep the default reviewer journey CPU-local and free of external service requirements.
+
+## Future and optional infrastructure environments
+
+GPU workers, remote accelerators, Kaggle/Colab, cloud resources, distributed stores, telemetry adapters, and multi-datacenter deployments are optional integrations outside the supported local baseline. Their interfaces do not prove deployment, throughput, scaling, migration downtime, cost, power, model-quality, or federation performance.
+
+Any future infrastructure result requires its own environment record, workload, method, evidence classification, and claim boundary. A local GPU is not required for baseline setup or validation.
+
+## Historical note
+
+Earlier revisions described a pre-development environment and small historical test totals. Those records described their checkpoints only and are not current evidence. Git history preserves them if needed.

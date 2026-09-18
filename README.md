@@ -189,7 +189,7 @@ src/mercury/
 tests/                  Focused, integration, adversarial, and certification tests
 ```
 
-## Installation
+## Quick Start
 
 The repository targets Windows, PowerShell, and Python 3.13. The pinned dependency set is in `requirements.txt`.
 
@@ -200,7 +200,7 @@ py -3.13 -m venv .venv
 .\.venv\Scripts\python.exe -c "import mercury; print(mercury.__file__)"
 ```
 
-Do not place credentials in the repository. `.env.example` documents the available environment-variable shape.
+Do not place credentials in the repository. `.env.example` documents the available environment-variable shape. The baseline requires no GPU, cloud account, paid API, or external service. See [RUNNING.md](docs/RUNNING.md) for portable setup, troubleshooting, certifications, evidence generation, and the complete reviewer journey.
 
 ## Running Tests
 
@@ -219,6 +219,8 @@ $cache = Join-Path $env:TEMP "mercury-cache-$stamp"
 .\.venv\Scripts\python.exe -m pytest tests -q --basetemp="$bt" -o cache_dir="$cache"
 ```
 
+For the maintained command surface, see [RUNNING.md](docs/RUNNING.md).
+
 ## Certification
 
 Each phase has an internal executable certification manifest under `configs/certification/` and an evaluator under `src/mercury/certification/`. These are architecture/completeness gates for this repository—not external, regulatory, security, or industry certifications.
@@ -233,6 +235,17 @@ Examples:
 ```
 
 Certification checks complement tests; they do not replace empirical validation on real infrastructure.
+
+## Evidence
+
+MERCURY X separates `MEASURED`, `SYNTHETIC`, `SIMULATED`, `STATIC_DEMO`, `UNCALIBRATED`, and `NOT_MEASURED` evidence. Generate a local machine-readable snapshot with:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\evidence\validate_evidence.py
+.\.venv\Scripts\python.exe scripts\evidence\run_evidence.py
+```
+
+The snapshot is written to the Git-ignored path `artifacts/evidence/mercury_evidence.json`. Read [BENCHMARKS_AND_EVIDENCE.md](docs/evidence/BENCHMARKS_AND_EVIDENCE.md) and the maintained [EVIDENCE_MANIFEST.json](docs/evidence/EVIDENCE_MANIFEST.json) before interpreting results. No GPU, cloud, distributed-scaling, physical-migration, model-quality, cost, or datacenter-performance measurement is claimed by the local baseline.
 
 ## Demonstration Modes
 
@@ -258,7 +271,8 @@ Then open `http://127.0.0.1:4173`.
 
 - Phases 0–30 have implementation and executable certification coverage in this repository.
 - The repository reached **1506 passing tests** during final Phase 26–30 validation.
-- The current documentation change does not claim a fresh test run or a production deployment.
+- The recorded 1506-test result is **historical**, not a current measurement.
+- A fresh current result belongs in the generated evidence snapshot and must retain its commit, environment, command, classification, and claim boundary.
 
 See [VALIDATION.md](docs/VALIDATION.md) for evidence categories and verification practice.
 

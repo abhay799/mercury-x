@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mercury-x"
 version = "0.0.0"
-description = "MERCURY X Autonomous Cognitive Compute Fabric pre-development baseline"
+description = "Research-oriented CPU-first control plane for deterministic AI workload orchestration"
 requires-python = ">=3.13,<3.14"
 dependencies = []
 
