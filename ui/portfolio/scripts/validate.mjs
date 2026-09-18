@@ -41,6 +41,7 @@ for (const phrase of [
   "Autonomous AI Compute &amp; Inference Fabric",
   "Research / Experimental",
   "Control-Plane Architecture",
+  "Launch Control Center",
   "1506",
   "256",
   "six deterministic scenarios",
