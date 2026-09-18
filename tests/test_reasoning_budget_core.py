@@ -5,9 +5,10 @@ from mercury.reasoning_budget.lifecycle import build_reasoning_budget
 from mercury.reasoning_budget.control import evaluate_escalation
 
 def request():
-    return ReasoningBudgetRequest(request_id="r",segment_id="s",quality_metric_id="quality.primary",
+    return ReasoningBudgetRequest(request_id="r",workload_id="w",segment_id="s",requirement_interface_id="req",quality_metric_id="quality.primary",
         quality_floor=.9,confidence_floor=.8,max_reasoning_steps=8,max_tokens=4096,max_compute_units=50,
-        max_speculative_branches=4,verification_depth_min=1,latency_ceiling_ms=2000,provenance_ids=("p",))
+        max_speculative_branches=4,verification_depth_min=1,latency_ceiling_ms=2000,
+        escalation_policy_id="escalate",stop_policy_id="stop",provenance_ids=("p",))
 
 def candidate(cid,q=.92,c=10,lat=1000,u=.2):
     return ReasoningBudgetCandidate(candidate_id=cid,reasoning_steps=4,max_tokens=2048,compute_units=c,

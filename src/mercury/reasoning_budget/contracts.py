@@ -23,7 +23,9 @@ class BudgetCalibrationState(str, Enum):
 
 class ReasoningBudgetRequest(ContractModel):
     request_id: str
+    workload_id: str
     segment_id: str
+    requirement_interface_id: str
     quality_metric_id: str
     quality_floor: float = Field(ge=0.0, le=1.0)
     confidence_floor: float = Field(ge=0.0, le=1.0)
@@ -33,12 +35,21 @@ class ReasoningBudgetRequest(ContractModel):
     max_speculative_branches: int = Field(ge=1)
     verification_depth_min: int = Field(ge=0)
     latency_ceiling_ms: int = Field(ge=1)
+    escalation_policy_id: str
+    stop_policy_id: str
     provenance_ids: tuple[str, ...] = ()
+
+    @field_validator("request_id", "workload_id", "segment_id", "requirement_interface_id", "quality_metric_id", "escalation_policy_id", "stop_policy_id")
+    @classmethod
+    def required_identity(cls, value):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("reasoning budget identity must be nonblank")
+        return value
 
     @field_validator("provenance_ids")
     @classmethod
     def unique_provenance(cls, v):
-        if len(v) != len(set(v)):
+        if not v or any(not item.strip() for item in v) or len(v) != len(set(v)):
             raise ValueError("duplicate provenance_ids")
         return tuple(sorted(v))
 
@@ -95,6 +106,18 @@ class ReasoningBudget(ContractModel):
     generation: int = Field(ge=1)
     evidence_ids: tuple[str, ...] = ()
     fingerprint: str
+
+    @model_validator(mode="after")
+    def validate_budget_integrity(self):
+        body={"id":self.reasoning_budget_id,"request":self.request_id,"candidate":self.chosen_candidate_id,
+              "generation":self.generation,"allocation":self.allocation.model_dump(mode="json"),
+              "quality_floor":self.quality_floor,"confidence_floor":self.confidence_floor,
+              "verification_depth":self.verification_depth}
+        if self.reasoning_budget_id != make_budget_id(self.request_id, self.chosen_candidate_id, self.generation):
+            raise ValueError("reasoning budget identity mismatch")
+        if self.fingerprint != canonical_hash(body):
+            raise ValueError("reasoning budget fingerprint mismatch")
+        return self
 
 
 class ReasoningBudgetDecision(ContractModel):

@@ -1,4 +1,6 @@
 {
+  "schema_version": "mercury.certification/v1",
+  "phase": 20,
   "required_gates": [
     "no_quality_reduction",
     "feasibility",

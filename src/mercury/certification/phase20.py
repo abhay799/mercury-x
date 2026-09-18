@@ -1,12 +1,10 @@
-import json
 from pathlib import Path
 from mercury.certification.phase20_checks import CHECKS
+from mercury.certification.manifest import load_certification_manifest
 
-def evaluate():
-    p=Path(__file__).parents[3]/"configs"/"certification"/"phase20.json"
-    gates=json.loads(p.read_text())["required_gates"]
-    if len(gates)!=len(set(gates)) or set(gates)!=set(CHECKS):
-        raise ValueError("invalid phase20 manifest")
+def evaluate(manifest_path=None):
+    p=Path(manifest_path) if manifest_path else Path(__file__).parents[3]/"configs"/"certification"/"phase20.json"
+    gates=load_certification_manifest(p,phase=20,known_gates=CHECKS)
     out=[]
     for gate in gates:
         ok,evidence=CHECKS[gate]()

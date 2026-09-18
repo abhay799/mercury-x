@@ -1,4 +1,6 @@
 {
+  "schema_version": "mercury.certification/v1",
+  "phase": 17,
   "required_gates": [
     "contracts",
     "quality_floor",

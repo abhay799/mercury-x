@@ -1,4 +1,6 @@
 {
+  "schema_version": "mercury.certification/v1",
+  "phase": 18,
   "required_gates": [
     "admission",
     "fairness",
