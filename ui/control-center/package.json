@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "check": "node scripts/validate.mjs",
+    "check:scenarios": "node scripts/validate-scenarios.mjs",
     "serve": "python -m http.server 4173"
   }
 }

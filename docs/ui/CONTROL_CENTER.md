@@ -32,6 +32,7 @@ The browser does not import or expose Python internals. A future API adapter sho
 | View | MERCURY scope |
 |---|---|
 | Mission Control | Cross-domain workload, safety, placement, policy, twin, and evidence summary |
+| Scenario Player | Six deterministic end-to-end demonstrations with lifecycle, decisions, safety, and audit evidence |
 | Workloads | Request-to-execution artifact drill-down |
 | Execution Graph | Logical DAG, dependencies, capabilities, context, and validation |
 | Model & Precision | Exact model/revision, capabilities, composition, precision, morphing, calibration |
@@ -55,6 +56,7 @@ The browser does not import or expose Python internals. A future API adapter sho
 - `src/components.js` contains reusable panels, tables, chips, provenance badges, progress bars, and callouts.
 - `src/views.js` maps the domain snapshot into all fourteen views.
 - `src/app.js` owns hash navigation, workload selection, loading/error state, accessibility interactions, and provider loading.
+- `src/scenarios/` owns immutable scenario definitions, deterministic playback, validation, and cross-view snapshot projection.
 - `styles.css` provides the responsive dark control-plane visual system without external assets or web fonts.
 
 ## Demo-Data Provenance
@@ -69,6 +71,8 @@ Every displayed control artifact or metric is labeled as one of:
 The provider contract also reserves `LIVE` for a future authenticated adapter; the current provider does not emit live data. Provenance records include a source type, generated-at value, evidence state, calibration state, and source identifiers.
 
 The static timestamp is snapshot metadata, not a claim of current telemetry. Synthetic utilization, health, workload, and topology values exist to demonstrate interface behavior. The digital twin is visibly `UNCALIBRATED` and `ADVISORY`.
+
+The [end-to-end demo scenarios](DEMO_SCENARIOS.md) use deterministic logical time and the same provenance categories. The scenario contracts reject `LIVE` records.
 
 ## Backend Boundary
 
@@ -102,6 +106,8 @@ From the repository root:
 
 Open `http://127.0.0.1:4173`.
 
+Open `http://127.0.0.1:4173/#/scenarios` to launch the Scenario Player directly.
+
 Alternatively:
 
 ```powershell
@@ -116,6 +122,12 @@ No dependency installation is required.
 ```powershell
 Set-Location ui/control-center
 npm run check
+```
+
+Scenario-specific validation:
+
+```powershell
+npm.cmd run check:scenarios
 ```
 
 The validator checks JavaScript syntax, required application files, navigation coverage, centralized provider loading, provenance metadata, protected safety markers, and static HTTP asset delivery.
@@ -138,4 +150,3 @@ The validator checks JavaScript syntax, required application files, navigation c
 - The digital twin is advisory and uncalibrated.
 - Physical GPU/VM memory migration is not depicted as implemented.
 - Simulation and synthetic evidence are never labeled live.
-

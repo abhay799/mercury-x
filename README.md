@@ -244,6 +244,8 @@ Accelerator execution, distributed deployment, real cloud resources, hardware-ba
 
 The [MERCURY X Control Center](docs/ui/CONTROL_CENTER.md) is an isolated, provenance-first static interface for exploring the Phase 0–30 architecture. Its current provider emits only `STATIC DEMO`, `SYNTHETIC`, `SIMULATED`, and `UNKNOWN` records—never live telemetry.
 
+The [end-to-end scenario system](docs/ui/DEMO_SCENARIOS.md) adds six deterministic demonstrations covering normal orchestration, quality/SLO conflict, migration, self-healing, adversarial scheduling with counterfactual analysis, and federated privacy/residency.
+
 Run it from the repository root:
 
 ```powershell

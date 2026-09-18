@@ -1,9 +1,13 @@
 import { DemoControlCenterProvider } from './data/demo-provider.js';
 import { escapeHtml } from './components.js';
+import { ScenarioController } from './scenarios/controller.js';
+import { SCENARIOS } from './scenarios/definitions.js';
+import { ScenarioControlCenterProvider } from './scenarios/scenario-provider.js';
 import { renderView, VIEW_DEFINITIONS } from './views.js';
 
-const provider = new DemoControlCenterProvider();
-const state = { snapshot: null, selectedWorkload: null, route: 'overview', error: null };
+const scenarioController = new ScenarioController(SCENARIOS);
+const provider = new ScenarioControlCenterProvider(new DemoControlCenterProvider(), scenarioController);
+const state = { snapshot: null, selectedWorkload: null, route: 'overview', scenario: scenarioController.getState(), error: null };
 
 const main = document.querySelector('#main-content');
 const nav = document.querySelector('#primary-nav');
@@ -67,6 +71,7 @@ async function loadSnapshot() {
   main.innerHTML = '<div class="loading-state" role="status"><span class="loader" aria-hidden="true"></span><strong>Loading control-plane snapshot</strong><p>Validating provenance and evidence boundaries…</p></div>';
   try {
     state.snapshot = await provider.getSnapshot();
+    state.scenario = scenarioController.getState();
     state.selectedWorkload ??= state.snapshot.workloads[0]?.id ?? null;
     render();
   } catch (error) {
@@ -75,13 +80,29 @@ async function loadSnapshot() {
   }
 }
 
+async function updateScenario(action, value) {
+  if (action === 'select') scenarioController.select(value);
+  else if (action === 'start') scenarioController.start();
+  else if (action === 'reset') scenarioController.reset();
+  else if (action === 'previous') scenarioController.previous();
+  else if (action === 'next') scenarioController.next();
+  state.scenario = scenarioController.getState();
+  state.selectedWorkload = state.scenario.scenario.workloadId;
+  state.snapshot = await provider.getSnapshot();
+  render();
+}
+
 window.addEventListener('hashchange', () => {
   state.route = routeFromHash();
   closeMenu();
   render();
 });
 
-document.addEventListener('click', (event) => {
+document.addEventListener('click', async (event) => {
+  const scenarioSelect = event.target.closest('[data-scenario-id]');
+  if (scenarioSelect) await updateScenario('select', scenarioSelect.dataset.scenarioId);
+  const scenarioAction = event.target.closest('[data-scenario-action]');
+  if (scenarioAction && !scenarioAction.disabled) await updateScenario(scenarioAction.dataset.scenarioAction);
   const routeButton = event.target.closest('[data-route]');
   if (routeButton) navigate(routeButton.dataset.route);
   const workloadButton = event.target.closest('[data-select-workload]');

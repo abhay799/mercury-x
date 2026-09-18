@@ -7,11 +7,15 @@ import { fileURLToPath } from 'node:url';
 import { DemoControlCenterProvider } from '../src/data/demo-provider.js';
 import { SOURCE_TYPES } from '../src/types.js';
 import { renderView, VIEW_DEFINITIONS } from '../src/views.js';
+import { ScenarioController } from '../src/scenarios/controller.js';
+import { SCENARIOS } from '../src/scenarios/definitions.js';
+import { ScenarioControlCenterProvider } from '../src/scenarios/scenario-provider.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
   'index.html', 'styles.css', 'src/app.js', 'src/components.js', 'src/views.js',
   'src/types.js', 'src/data/provider.js', 'src/data/demo-provider.js', 'src/data/demo-data.js',
+  'src/scenarios/contracts.js', 'src/scenarios/definitions.js', 'src/scenarios/controller.js', 'src/scenarios/scenario-provider.js',
 ];
 
 const failures = [];
@@ -41,17 +45,29 @@ const css = await readFile(path.join(root, 'styles.css'), 'utf8');
 const views = await readFile(path.join(root, 'src/views.js'), 'utf8');
 assert(html.includes('src/app.js') && html.includes('styles.css'), 'HTML entrypoint references are incomplete');
 assert((css.match(/{/g) ?? []).length === (css.match(/}/g) ?? []).length, 'CSS braces are unbalanced');
-assert((views.match(/\['[a-z-]+', '[^']+', '[^']+'\]/g) ?? []).length === 14, 'Expected 14 navigation view definitions');
+assert((views.match(/\['[a-z-]+', '[^']+', '[^']+'\]/g) ?? []).length === 15, 'Expected 15 navigation view definitions');
 
-const snapshot = await new DemoControlCenterProvider().getSnapshot();
+const scenarioController = new ScenarioController(SCENARIOS);
+const scenarioProvider = new ScenarioControlCenterProvider(new DemoControlCenterProvider(), scenarioController);
+const snapshot = await scenarioProvider.getSnapshot();
 assert(snapshot.schema === 'mercury.control-center/v1', 'Unexpected control-center schema');
 assert(snapshot.mode === 'STATIC DEMONSTRATION', 'Demo provider must declare demonstration mode');
 assert(snapshot.workloads.length > 0 && snapshot.evidence.length > 0, 'Demo snapshot lacks required artifacts');
-assert(VIEW_DEFINITIONS.length === 14, 'Expected fourteen discoverable control-center views');
+assert(VIEW_DEFINITIONS.length === 15, 'Expected fifteen discoverable control-center views');
 for (const [viewId, label] of VIEW_DEFINITIONS) {
   const markup = renderView(viewId, snapshot, { selectedWorkload: snapshot.workloads[0].id });
   assert(typeof markup === 'string' && markup.length > 500, `View did not render meaningful markup: ${label}`);
   assert(markup.includes('<h1>'), `View lacks a primary heading: ${label}`);
+}
+
+scenarioController.select('quality-slo-conflict');
+scenarioController.start();
+scenarioController.next();
+const scenarioSnapshot = await scenarioProvider.getSnapshot();
+const scenarioState = scenarioController.getState();
+for (const viewId of ['scenarios', 'overview', 'workloads', 'compute', 'slo', 'migration', 'scheduler', 'federation', 'evidence']) {
+  const markup = renderView(viewId, scenarioSnapshot, { selectedWorkload: scenarioState.scenario.workloadId, scenario: scenarioState });
+  assert(markup.includes(scenarioState.scenarioId) || markup.includes(scenarioState.currentStep.label), `Scenario context missing from linked view: ${viewId}`);
 }
 
 let provenanceCount = 0;
