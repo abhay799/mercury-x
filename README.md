@@ -27,6 +27,34 @@ The repository implements a CPU-first control plane: typed contracts, determinis
 - Advisory adversarial, counterfactual, and uncalibrated digital-twin systems that cannot silently authorize production action.
 - Controlled policy evolution, privacy/residency enforcement, deterministic demo scenarios, and reproducible evidence tooling.
 
+## Visual Tour
+
+The MERCURY X Control Center provides a provenance-first interface for exploring deterministic control-plane decisions, execution structure, compute state, scenarios, and evidence boundaries.
+
+### Scenario Player
+
+Step through reproducible scenarios including normal orchestration, quality/SLO conflict, live workload migration, self-healing recovery, adversarial scheduling, and federated privacy decisions.
+
+![MERCURY X Scenario Player](docs/assets/screenshots/mercury-scenario-player.png)
+
+### Execution Graph
+
+Inspect the logical AI execution DAG across input, retrieval, reasoning, validation, and output stages. Displayed placement and execution information represents control-plane artifacts and does not claim live distributed execution.
+
+![MERCURY X Execution Graph](docs/assets/screenshots/mercury-execution-graph.png)
+
+### Evidence & Audit
+
+Inspect provenance, evidence classifications, validation state, and the boundary between implemented behavior, simulation, and capabilities that are not claimed.
+
+![MERCURY X Evidence and Audit](docs/assets/screenshots/mercury-evidence-audit.png)
+
+### Compute Fabric
+
+Explore hardware personality, topology, placement, and compute-control information exposed through the research control plane.
+
+![MERCURY X Compute Fabric](docs/assets/screenshots/mercury-compute-fabric.png)
+
 ## Why MERCURY X Exists
 
 Modern AI execution is more than choosing a model. A control plane must reconcile heterogeneous accelerators, model and precision compatibility, graph structure, context and KV state, reasoning cost, placement, speculation, migration, failures, privacy and residency rules, edge/cloud federation, and scheduling policy changes. Those inputs can be incomplete, stale, or contradictory.
@@ -182,14 +210,17 @@ configs/
   policies/             Policy configuration
   registries/           Capability/registry data
   slo/                  SLO configuration
+
 docs/
   architecture/         Product-level architecture and safety documentation
   evidence/             Evidence taxonomy, report, and maintained manifest
   ui/                   Control Center, scenario, and portfolio documentation
   superpowers/specs/    Phase design specifications
   superpowers/plans/    Phase implementation plans
+
 scripts/
   evidence/             Local evidence validation and snapshot generation
+
 src/mercury/
   gateway, intelligence, graph/
                         Workload ingestion and logical planning
@@ -210,8 +241,10 @@ src/mercury/
                         Federation and privacy boundaries
   datacenter_twin, control_intelligence, platform/
                         Simulation, supervision, and platform modes
-  certification/       Executable internal certification evaluators
+  certification/        Executable internal certification evaluators
+
 tests/                  Focused, integration, adversarial, and certification tests
+
 ui/
   control-center/       Static provenance-first product demonstration
   portfolio/            Static engineering portfolio and project explanation
