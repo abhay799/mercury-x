@@ -1,0 +1,6 @@
+{
+  "schema_version": "phase29-cert-v1",
+  "required_gates": [
+    "human_control_gate"
+  ]
+}

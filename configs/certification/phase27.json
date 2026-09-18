@@ -1,0 +1,6 @@
+{
+  "schema_version": "phase27-cert-v1",
+  "required_gates": [
+    "privacy_envelope"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "schema_version": "phase30-cert-v1",
+  "required_gates": [
+    "safe_research_mode"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "schema_version": "phase28-cert-v1",
+  "required_gates": [
+    "twin_simulation"
+  ]
+}
