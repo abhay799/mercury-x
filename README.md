@@ -16,7 +16,7 @@ The repository implements a CPU-first control plane: typed contracts, determinis
 | Safety | Fail-closed invariants for quality, authorization, privacy, stale state, migration authority, recovery, simulation, and human control |
 | Boundary | Experimental control-plane software; no production datacenter, GPU-runtime, or infrastructure-performance claim |
 
-**Explore:** [Portfolio](ui/portfolio/) · [Control Center](ui/control-center/) · [Architecture](docs/architecture/MERCURY_X_ARCHITECTURE.md) · [Phase Index](docs/architecture/PHASE_INDEX.md) · [Safety Invariants](docs/architecture/SAFETY_INVARIANTS.md) · [Evidence](docs/evidence/BENCHMARKS_AND_EVIDENCE.md) · [Run locally](docs/RUNNING.md) · [Limitations](docs/LIMITATIONS.md)
+**Explore:** [Portfolio](ui/portfolio/) · [Control Center](ui/control-center/) · [Architecture](docs/architecture/MERCURY_X_ARCHITECTURE.md) · [Phase Index](docs/architecture/PHASE_INDEX.md) · [Safety Invariants](docs/architecture/SAFETY_INVARIANTS.md) · [Evidence](docs/evidence/BENCHMARKS_AND_EVIDENCE.md) · [Demo Package](docs/demo/SCREENSHOT_PLAN.md) · [Run locally](docs/RUNNING.md) · [Limitations](docs/LIMITATIONS.md)
 
 ## Project Highlights
 
