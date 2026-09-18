@@ -1,0 +1,10 @@
+{
+  "name": "mercury-x-portfolio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/validate.mjs",
+    "serve": "python -m http.server 4174 --directory ../.."
+  }
+}

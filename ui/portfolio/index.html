@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="MERCURY X is an experimental control-plane architecture for evidence-aware AI workload orchestration."
+    />
+    <title>MERCURY X — Engineering Portfolio</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header" data-header>
+      <a class="brand" href="#top" aria-label="MERCURY X portfolio home">
+        <span class="brand__mark" aria-hidden="true">MX</span>
+        <span>MERCURY X</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+      <nav id="primary-nav" class="site-nav" aria-label="Primary navigation">
+        <a href="#architecture">Architecture</a>
+        <a href="#safety">Safety</a>
+        <a href="#scenarios">Scenarios</a>
+        <a href="#evidence">Evidence</a>
+        <a class="nav-cta" href="../control-center/index.html">Open Control Center</a>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section id="top" class="hero section-shell">
+        <div class="hero__copy">
+          <div class="eyebrow-row">
+            <span class="chip chip--research">Research / Experimental</span>
+            <span class="chip">Control-Plane Architecture</span>
+          </div>
+          <p class="kicker">Autonomous AI Compute &amp; Inference Fabric</p>
+          <h1>Reason about AI execution as one evidence-bound system.</h1>
+          <p class="hero__lede">
+            MERCURY X coordinates workload intent, model adaptation, context, placement, quality,
+            negotiation, migration, recovery, privacy, simulation, and human control through a
+            deterministic CPU-first research control plane.
+          </p>
+          <div class="hero__actions">
+            <a class="button button--primary" href="../control-center/index.html">Explore the Control Center</a>
+            <a class="button" href="../../docs/architecture/MERCURY_X_ARCHITECTURE.md">Read the architecture</a>
+          </div>
+          <p class="boundary-note">
+            Implements control-plane logic and deterministic demonstrations. It does not claim a
+            production datacenter deployment or production GPU runtime.
+          </p>
+        </div>
+
+        <div class="hero__system" aria-label="MERCURY X control loop overview">
+          <div class="system-orbit system-orbit--outer" aria-hidden="true"></div>
+          <div class="system-orbit system-orbit--inner" aria-hidden="true"></div>
+          <div class="system-core">
+            <span class="system-core__label">Control fabric</span>
+            <strong>Evidence</strong>
+            <span>Decision</span>
+            <span>Verification</span>
+          </div>
+          <span class="orbit-node orbit-node--one">Workload</span>
+          <span class="orbit-node orbit-node--two">Compute</span>
+          <span class="orbit-node orbit-node--three">Policy</span>
+          <span class="orbit-node orbit-node--four">Recovery</span>
+          <div class="system-status"><span></span> fail-closed by default</div>
+        </div>
+      </section>
+
+      <section class="proof-strip" aria-label="Current repository evidence">
+        <div><strong>31</strong><span>numbered phases<br />0 through 30</span></div>
+        <div><strong>1506</strong><span>fresh local<br />tests passed</span></div>
+        <div><strong>256</strong><span>certification-focused<br />tests passed</span></div>
+        <div><strong>6</strong><span>deterministic<br />demo scenarios</span></div>
+        <p><span class="provenance">MEASURED + SYNTHETIC</span> Local validation evidence, not infrastructure performance.</p>
+      </section>
+
+      <section id="problem" class="section section-shell split-section">
+        <div class="section-heading sticky-heading">
+          <span class="section-index">01 / Problem</span>
+          <h2>AI execution is a coupled control problem.</h2>
+        </div>
+        <div class="prose-stack">
+          <p class="lead">
+            Modern AI systems cannot optimize one variable in isolation. Model capability, compute
+            availability, latency, quality, context, topology, privacy, failures, and policy all
+            constrain the same execution decision.
+          </p>
+          <p>
+            MERCURY X explores how those constraints can be coordinated without turning missing or
+            contradictory evidence into permission. Each phase accepts explicit inputs, preserves
+            provenance, emits a checkable artifact, and exposes a failure state.
+          </p>
+          <div class="tension-grid" aria-label="Execution tensions">
+            <span>Capability ↔ Capacity</span><span>Latency ↔ Quality</span>
+            <span>Context ↔ Locality</span><span>Adaptation ↔ Safety</span>
+            <span>Federation ↔ Privacy</span><span>Autonomy ↔ Human authority</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="architecture" class="section section--tinted">
+        <div class="section-shell">
+          <div class="section-heading section-heading--wide">
+            <div><span class="section-index">02 / System architecture</span><h2>Nine layers. One governed lifecycle.</h2></div>
+            <p>Phase 0 through Phase 30 are grouped by responsibility, with typed artifacts and explicit boundaries between layers.</p>
+          </div>
+          <div class="layer-grid">
+            <details class="layer-card" open>
+              <summary><span>01</span><strong>Foundation &amp; workload intelligence</strong><em>Phases 0–3</em></summary>
+              <p>Runtime evidence, cognitive gateway, workload intelligence, and logical execution graphs.</p>
+            </details>
+            <details class="layer-card">
+              <summary><span>02</span><strong>Model &amp; execution adaptation</strong><em>Phases 4–7</em></summary>
+              <p>Capability discovery, composition, adaptive precision, and bounded model morphing.</p>
+            </details>
+            <details class="layer-card">
+              <summary><span>03</span><strong>Memory &amp; context fabric</strong><em>Phases 8–12</em></summary>
+              <p>Session memory, governed global context, prediction, semantic KV reuse, and disaggregation.</p>
+            </details>
+            <details class="layer-card">
+              <summary><span>04</span><strong>Hardware &amp; placement intelligence</strong><em>Phases 13–16</em></summary>
+              <p>Hardware personality, topology, predictive placement, and bounded speculation.</p>
+            </details>
+            <details class="layer-card">
+              <summary><span>05</span><strong>Reasoning, SLO &amp; negotiation</strong><em>Phases 17–20</em></summary>
+              <p>Reasoning budgets, quality scheduling, intelligence contracts, and compute negotiation.</p>
+            </details>
+            <details class="layer-card">
+              <summary><span>06</span><strong>Migration &amp; resilience</strong><em>Phases 21–22</em></summary>
+              <p>Verified migration state transitions, rollback, incident detection, and bounded healing.</p>
+            </details>
+            <details class="layer-card">
+              <summary><span>07</span><strong>Scheduler intelligence</strong><em>Phases 23–25</em></summary>
+              <p>Adversarial challenge, advisory counterfactuals, and controlled policy evolution.</p>
+            </details>
+            <details class="layer-card">
+              <summary><span>08</span><strong>Federation &amp; privacy</strong><em>Phases 26–27</em></summary>
+              <p>Cross-domain candidates constrained by authorization, privacy, purpose, and residency.</p>
+            </details>
+            <details class="layer-card">
+              <summary><span>09</span><strong>Simulation, supervision &amp; platform</strong><em>Phases 28–30</em></summary>
+              <p>Uncalibrated digital-twin simulation, human-supervised control, and safe research mode.</p>
+            </details>
+          </div>
+          <div class="section-links">
+            <a href="../../docs/architecture/PHASE_INDEX.md">Browse the phase index →</a>
+            <a href="../../docs/architecture/MERCURY_X_ARCHITECTURE.md">Read the full architecture →</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="lifecycle" class="section section-shell">
+        <div class="section-heading section-heading--wide">
+          <div><span class="section-index">03 / How MERCURY thinks</span><h2>A closed loop from signal to verification.</h2></div>
+          <p>Every transition represents a logical control-plane responsibility—not an assertion that physical infrastructure was executed.</p>
+        </div>
+        <ol class="lifecycle" aria-label="MERCURY X lifecycle">
+          <li>Sense</li><li>Understand workload</li><li>Build graph</li><li>Select model / precision</li>
+          <li>Resolve context</li><li>Place compute</li><li>Allocate reasoning</li><li>Enforce SLO</li>
+          <li>Negotiate</li><li>Execute</li><li>Observe</li><li>Migrate / heal</li>
+          <li>Challenge</li><li>Simulate</li><li>Learn safely</li><li>Govern</li><li>Verify</li>
+        </ol>
+      </section>
+
+      <section id="systems" class="section section--tinted">
+        <div class="section-shell">
+          <div class="section-heading section-heading--wide">
+            <div><span class="section-index">04 / Engineering systems</span><h2>Subsystems designed around explicit contracts.</h2></div>
+            <p>The implementation favors deterministic state, bounded candidate generation, evidence lineage, and controlled failure over opaque automation.</p>
+          </div>
+          <div class="systems-grid">
+            <article><span>Graph</span><h3>Execution Graph</h3><p>Builds and validates logical DAGs before resource decisions.</p></article>
+            <article><span>Adapt</span><h3>Model &amp; precision</h3><p>Composes compatible capabilities without hidden ranking or hardware leakage.</p></article>
+            <article><span>Context</span><h3>Memory fabric</h3><p>Scopes session, global, predictive, and semantic KV state with isolation.</p></article>
+            <article><span>Place</span><h3>Hardware &amp; topology</h3><p>Models personality, locality, topology generations, and placement readiness.</p></article>
+            <article><span>Quality</span><h3>Intelligence SLO</h3><p>Compiles explicit quality, reasoning, latency, and verification requirements.</p></article>
+            <article><span>Negotiate</span><h3>Compute negotiation</h3><p>Returns accept, counteroffer, defer, or reject without silent quality loss.</p></article>
+            <article><span>Resilience</span><h3>Migration &amp; healing</h3><p>Coordinates cutover authority, rollback, bounded recovery, and verification.</p></article>
+            <article><span>Challenge</span><h3>Adversarial scheduler</h3><p>Challenges unsafe decisions and keeps counterfactual output advisory.</p></article>
+            <article><span>Govern</span><h3>Policy evolution</h3><p>Separates proposals, shadow evaluation, approval, promotion, and rollback.</p></article>
+            <article><span>Federate</span><h3>Privacy-aware execution</h3><p>Rejects candidates that violate scope, purpose, residency, or authorization.</p></article>
+            <article><span>Simulate</span><h3>Digital twin</h3><p>Models datacenter scenarios while preserving an explicit <code>UNCALIBRATED</code> state.</p></article>
+            <article><span>Supervise</span><h3>Control intelligence</h3><p>Surfaces recommendations, dissent, evidence, and human approval boundaries.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section id="safety" class="section section-shell">
+        <div class="section-heading section-heading--wide">
+          <div><span class="section-index">05 / Safety by design</span><h2>Hard failures do not become execution.</h2></div>
+          <a class="text-link" href="../../docs/architecture/SAFETY_INVARIANTS.md">Read the safety invariants →</a>
+        </div>
+        <div class="safety-flow" aria-label="Fail-closed decision flow">
+          <div><span>Input</span><strong>Evidence-bound request</strong></div>
+          <i aria-hidden="true">→</i>
+          <div><span>Gate</span><strong>Hard invariants</strong></div>
+          <i aria-hidden="true">→</i>
+          <div class="safety-flow__branch"><span>Outcome</span><strong>Execute</strong><em>or reject · defer · counteroffer · rollback · escalate</em></div>
+        </div>
+        <div class="invariant-grid">
+          <article><span>01</span><h3>Quality</h3><p>An agreed floor cannot be silently degraded to satisfy pressure.</p></article>
+          <article><span>02</span><h3>Authorization</h3><p>Requested authority must match the exact scope of the decision.</p></article>
+          <article><span>03</span><h3>Privacy</h3><p>Purpose, classification, and residency remain hard constraints.</p></article>
+          <article><span>04</span><h3>Stale state</h3><p>Generation-aware checks reject obsolete evidence and plans.</p></article>
+          <article><span>05</span><h3>Migration authority</h3><p>Cutover preserves exactly one authoritative executor.</p></article>
+          <article><span>06</span><h3>Recovery verification</h3><p>Healing is bounded, checked, and escalated when verification fails.</p></article>
+          <article><span>07</span><h3>Simulation boundary</h3><p>Counterfactual and twin output cannot authorize execution.</p></article>
+          <article><span>08</span><h3>Human control</h3><p>Promotion and sensitive action retain explicit approval boundaries.</p></article>
+        </div>
+      </section>
+
+      <section id="scenarios" class="section section--tinted">
+        <div class="section-shell">
+          <div class="section-heading section-heading--wide">
+            <div><span class="section-index">06 / Demonstration</span><h2>Six deterministic end-to-end scenarios.</h2></div>
+            <p>Each scenario is fixture-backed and labeled. It demonstrates logic; it does not report a live infrastructure event.</p>
+          </div>
+          <div class="scenario-grid">
+            <article class="scenario-card"><span class="scenario-card__number">01</span><div><h3>Normal orchestration</h3><p>Requirement intake through verified completion.</p><span class="provenance">STATIC_DEMO · SYNTHETIC</span></div></article>
+            <article class="scenario-card"><span class="scenario-card__number">02</span><div><h3>Quality / SLO conflict</h3><p>Pressure meets a preserved quality floor and returns a counteroffer.</p><span class="provenance">STATIC_DEMO · SYNTHETIC</span></div></article>
+            <article class="scenario-card"><span class="scenario-card__number">03</span><div><h3>Live migration</h3><p>Logical cutover, one authority, verification, and rollback path.</p><span class="provenance">STATIC_DEMO · SIMULATED</span></div></article>
+            <article class="scenario-card"><span class="scenario-card__number">04</span><div><h3>Self-healing</h3><p>Fault detection, bounded response, safe-state rollback, and escalation.</p><span class="provenance">STATIC_DEMO · SIMULATED</span></div></article>
+            <article class="scenario-card"><span class="scenario-card__number">05</span><div><h3>Adversarial + counterfactual</h3><p>Challenges a decision while keeping alternative analysis advisory.</p><span class="provenance">STATIC_DEMO · SIMULATED</span></div></article>
+            <article class="scenario-card"><span class="scenario-card__number">06</span><div><h3>Federated privacy</h3><p>Residency and authority reject noncompliant execution candidates.</p><span class="provenance">STATIC_DEMO · SYNTHETIC</span></div></article>
+          </div>
+          <a class="button" href="../../docs/ui/DEMO_SCENARIOS.md">Read scenario design and boundaries</a>
+        </div>
+      </section>
+
+      <section id="evidence" class="section section-shell">
+        <div class="section-heading section-heading--wide">
+          <div><span class="section-index">07 / Evidence</span><h2>Claims stop where evidence stops.</h2></div>
+          <a class="text-link" href="../../docs/evidence/BENCHMARKS_AND_EVIDENCE.md">Inspect the evidence report →</a>
+        </div>
+        <div class="evidence-layout">
+          <div class="evidence-grid">
+            <article><strong>1506</strong><span>Full regression tests passed</span><small>MEASURED command result · SYNTHETIC test inputs</small></article>
+            <article><strong>256</strong><span>Certification-focused tests passed</span><small>Internal architecture gates, not external certification</small></article>
+            <article><strong>PASS</strong><span>Phase 30 certification CLI</span><small>Safe research-mode repository gate</small></article>
+            <article><strong>PASS</strong><span>Control Center validation</span><small>STATIC_DEMO · 15 views · provenance checked</small></article>
+            <article><strong>PASS</strong><span>Scenario validation</span><small>six deterministic scenarios · boundaries checked</small></article>
+            <article><strong>0–30</strong><span>Manifest/evaluator coverage</span><small>31 numbered phases · repository artifact inventory</small></article>
+          </div>
+          <aside class="evidence-note">
+            <span class="provenance provenance--measured">MEASURED</span>
+            <h3>Context travels with the result.</h3>
+            <p>Values above come from the committed Step 5 report. Test counts prove tested behavior in the recorded local environment—not throughput, latency, savings, or production deployment.</p>
+            <a href="../../docs/VALIDATION.md">How validation works →</a>
+          </aside>
+        </div>
+      </section>
+
+      <section id="boundaries" class="section boundary-section">
+        <div class="section-shell split-section">
+          <div class="section-heading sticky-heading">
+            <span class="section-index">08 / Credibility boundary</span>
+            <h2>What is not claimed.</h2>
+            <p>Absence of a measurement is represented explicitly as `NOT_MEASURED`.</p>
+          </div>
+          <ul class="not-claimed-list">
+            <li><span>01</span>Production datacenter deployment</li>
+            <li><span>02</span>GPU inference throughput or multi-GPU scaling</li>
+            <li><span>03</span>Physical GPU or VM memory migration</li>
+            <li><span>04</span>Production scheduler gains</li>
+            <li><span>05</span>Calibrated datacenter-twin predictive accuracy</li>
+            <li><span>06</span>Production federation latency</li>
+            <li><span>07</span>Real-world cost or power savings</li>
+            <li><span>08</span>Autonomous production policy promotion</li>
+          </ul>
+        </div>
+        <div class="boundary-label">NOT_MEASURED · NOT_DEPLOYED · NOT_LIVE</div>
+      </section>
+
+      <section id="technology" class="section section-shell">
+        <div class="section-heading section-heading--wide">
+          <div><span class="section-index">09 / Engineering</span><h2>Built for inspection, not mystique.</h2></div>
+          <p>No external UI framework, hosted asset, GPU, or cloud service is required for the portfolio baseline.</p>
+        </div>
+        <div class="tech-grid">
+          <div><span>Language</span><strong>Python 3.13</strong><p>Typed contracts and deterministic engines.</p></div>
+          <div><span>Verification</span><strong>Pytest</strong><p>Focused, integration, adversarial, and certification tests.</p></div>
+          <div><span>Architecture</span><strong>Versioned contracts</strong><p>Identity, generation, provenance, and evidence boundaries.</p></div>
+          <div><span>Policy</span><strong>SLO engines</strong><p>Quality-aware compilation, negotiation, and fail-closed outcomes.</p></div>
+          <div><span>Interface</span><strong>HTML · CSS · ES modules</strong><p>Dependency-free Control Center and portfolio surfaces.</p></div>
+          <div><span>Reproducibility</span><strong>Evidence manifests</strong><p>Machine-readable checks with explicit classifications.</p></div>
+        </div>
+      </section>
+
+      <section id="status" class="section status-section">
+        <div class="section-shell status-grid">
+          <div><span class="section-index">10 / Project status</span><h2>Research scope implemented.<br />Productization in progress.</h2></div>
+          <div class="status-list">
+            <div><span>Phases 0–30</span><strong>Implemented through intended research / control-plane scope</strong></div>
+            <div><span>Product surfaces</span><strong>Control Center · Demo scenarios · Portfolio</strong></div>
+            <div><span>Evidence</span><strong>Fresh regression · Internal certification · Reproducible runner</strong></div>
+            <div><span>Infrastructure</span><strong>Optional future integration · not required locally</strong></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer section-shell">
+      <div><strong>MERCURY X</strong><p>Experimental autonomous AI compute &amp; inference control fabric.</p></div>
+      <nav aria-label="Repository resources">
+        <a href="../../README.md">Repository</a>
+        <a href="../../docs/RUNNING.md">Run locally</a>
+        <a href="../../docs/LIMITATIONS.md">Limitations</a>
+        <a href="../control-center/index.html">Control Center</a>
+      </nav>
+    </footer>
+  </body>
+</html>

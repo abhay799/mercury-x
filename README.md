@@ -6,6 +6,27 @@ MERCURY X is an experimental, research-oriented AI compute control fabric design
 
 The repository implements a CPU-first control plane: typed contracts, deterministic decision engines, validation layers, provenance records, failure handling, and executable certification gates. It does not claim to be a deployed autonomous datacenter or a production GPU runtime.
 
+## At a Glance
+
+| Scope | Current repository evidence |
+|---|---|
+| Architecture | 31 numbered phases, Phase 0 through Phase 30, implemented through the intended research/control-plane scope |
+| Validation | 1506 fresh local regression tests and 256 certification-focused tests passed |
+| Demonstration | Dependency-free Control Center with six deterministic end-to-end scenarios |
+| Safety | Fail-closed invariants for quality, authorization, privacy, stale state, migration authority, recovery, simulation, and human control |
+| Boundary | Experimental control-plane software; no production datacenter, GPU-runtime, or infrastructure-performance claim |
+
+**Explore:** [Portfolio](ui/portfolio/) · [Control Center](ui/control-center/) · [Architecture](docs/architecture/MERCURY_X_ARCHITECTURE.md) · [Phase Index](docs/architecture/PHASE_INDEX.md) · [Safety Invariants](docs/architecture/SAFETY_INVARIANTS.md) · [Evidence](docs/evidence/BENCHMARKS_AND_EVIDENCE.md) · [Run locally](docs/RUNNING.md) · [Limitations](docs/LIMITATIONS.md)
+
+## Project Highlights
+
+- Phase 0–30 architecture spanning workload intelligence, model adaptation, memory/context, placement, reasoning, SLOs, negotiation, resilience, scheduler challenge, federation, simulation, and supervisory control.
+- Typed, versioned, deterministic contracts with identity, generation, provenance, and explicit evidence.
+- Quality-aware execution that rejects, defers, or counteroffers instead of silently weakening hard requirements.
+- Logical live-migration and self-healing control planes with authority, verification, rollback, and escalation invariants.
+- Advisory adversarial, counterfactual, and uncalibrated digital-twin systems that cannot silently authorize production action.
+- Controlled policy evolution, privacy/residency enforcement, deterministic demo scenarios, and reproducible evidence tooling.
+
 ## Why MERCURY X Exists
 
 Modern AI execution is more than choosing a model. A control plane must reconcile heterogeneous accelerators, model and precision compatibility, graph structure, context and KV state, reasoning cost, placement, speculation, migration, failures, privacy and residency rules, edge/cloud federation, and scheduling policy changes. Those inputs can be incomplete, stale, or contradictory.
@@ -163,8 +184,12 @@ configs/
   slo/                  SLO configuration
 docs/
   architecture/         Product-level architecture and safety documentation
+  evidence/             Evidence taxonomy, report, and maintained manifest
+  ui/                   Control Center, scenario, and portfolio documentation
   superpowers/specs/    Phase design specifications
   superpowers/plans/    Phase implementation plans
+scripts/
+  evidence/             Local evidence validation and snapshot generation
 src/mercury/
   gateway, intelligence, graph/
                         Workload ingestion and logical planning
@@ -187,6 +212,9 @@ src/mercury/
                         Simulation, supervision, and platform modes
   certification/       Executable internal certification evaluators
 tests/                  Focused, integration, adversarial, and certification tests
+ui/
+  control-center/       Static provenance-first product demonstration
+  portfolio/            Static engineering portfolio and project explanation
 ```
 
 ## Quick Start
