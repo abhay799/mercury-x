@@ -320,7 +320,7 @@ Some distributed, cloud, and hardware capabilities remain interface or simulatio
 
 ## Roadmap Status
 
-Phases 0–30 are complete. Future work is productization rather than another numbered phase: empirical benchmarking, real infrastructure integrations, operational UI, reproducible experiments, and deployment evaluation.
+Phases 0–30 and the v0.1.0 productization pass are complete. Future work focuses on empirical benchmarking, real infrastructure integrations, reproducible experiments, deployment evaluation, and evidence-backed hardening.
 
 ## Engineering Principles
 
