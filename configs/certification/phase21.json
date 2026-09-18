@@ -1,0 +1,12 @@
+{
+  "schema_version": "phase21-cert-v1",
+  "required_gates": [
+    "contracts",
+    "eligibility",
+    "destination",
+    "lifecycle",
+    "no_quality_degrade",
+    "security",
+    "planning"
+  ]
+}
