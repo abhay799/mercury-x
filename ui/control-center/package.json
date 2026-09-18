@@ -1,0 +1,10 @@
+{
+  "name": "mercury-x-control-center",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/validate.mjs",
+    "serve": "python -m http.server 4173"
+  }
+}

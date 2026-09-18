@@ -240,6 +240,18 @@ The repository supports CPU-local demonstrations of its control-plane contracts 
 
 Accelerator execution, distributed deployment, real cloud resources, hardware-backed privacy, and live multi-datacenter operations require adapters and infrastructure outside the certified local baseline. Interfaces and simulations for these concerns must not be presented as measured production behavior.
 
+### Control Center
+
+The [MERCURY X Control Center](docs/ui/CONTROL_CENTER.md) is an isolated, provenance-first static interface for exploring the Phase 0–30 architecture. Its current provider emits only `STATIC DEMO`, `SYNTHETIC`, `SIMULATED`, and `UNKNOWN` records—never live telemetry.
+
+Run it from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe -m http.server 4173 --directory ui/control-center
+```
+
+Then open `http://127.0.0.1:4173`.
+
 ## Current Validation State
 
 - Phases 0–30 have implementation and executable certification coverage in this repository.
